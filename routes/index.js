@@ -12,7 +12,6 @@ module.exports = exports = function(app) {
    ///routes    
    app.post('/nuevo_proyecto', projectHandler.handleNewProject);
    
-   
    app.get('/', function(req, res, next) {
         var body = '{"msg":"Hello World"}';
         res.setHeader('Content-Type', 'text/html');
