@@ -1,19 +1,25 @@
 //var ContentHandler = require('./content')
 var ErrorHandler = require('./error').errorHandler;
+var ProjectHandler = require('./project');
 
 module.exports = exports = function(app) {
-/*
-    var contentHandler = new ContentHandler();
+    /// handlers
+    var projectHandler = new ProjectHandler();
+    
+    ///Common middlewares
+    ///app.use(contentHandler.log_coneection);
+    
+   ///routes    
+   app.post('/nuevo_proyecto', projectHandler.handleNewProject);
+   
+   
+   app.get('/', function(req, res, next) {
+        var body = '{"msg":"Hello World"}';
+        res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Content-Length', body.length);
+        res.end(body);
+        });
 
-    app.use(contentHandler.log_coneection);
-
-    app.get('/status', contentHandler.statusProject);
-      app.post('/status', contentHandler.statusProject);
-    app.get('/', contentHandler.displayMainPage);
-  
-app.get('*', contentHandler.not_found);
-app.post('*', contentHandler.not_found);
-*/
-    // Error handling middleware
-    app.use(ErrorHandler);
+   // Error handling middleware
+   app.use(ErrorHandler);
 }
