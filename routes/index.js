@@ -2,9 +2,9 @@
 var ErrorHandler = require('./error').errorHandler;
 var ProjectHandler = require('./project');
 
-module.exports = exports = function(app) {
+module.exports = exports = function(app,db) {
     /// handlers
-    var projectHandler = new ProjectHandler();
+    var projectHandler = new ProjectHandler(db);
     
     ///Common middlewares
     ///app.use(contentHandler.log_coneection);
