@@ -68,7 +68,7 @@ vows.describe('creacion_proyecto').addBatch({
 				eval("var prueba =" + doc.funcion_crear_cromosoma.code);
 				assert.isFunction(prueba);
 			},
-			"Debe tener una cantidad de poblacion": function(err,doc){			
+			"Debe tener una cantidad de poblacion" : function(err, doc) {
 				DB.close();
 				assert.isNumber(doc.tamano_poblacion);
 			}
@@ -79,6 +79,5 @@ vows.describe('creacion_proyecto').addBatch({
 		"Deberia enviar codigo de error" : assertAPI.assertStatus(400)
 	},
 	"Crear un proyecto con el nombre de uno ya creado" : {}
-	//  }).export(module); // Export the Suite;
-}).run();
+}).export(module);
 
