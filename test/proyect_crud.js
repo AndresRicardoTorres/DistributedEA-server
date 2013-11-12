@@ -37,7 +37,14 @@ vows.describe('creacion_proyecto').addBatch({
 			topic : function(error, response, body) {
 				var topicTHIS = this;
 				var query = {
-					"proyecto" : nombre_proyecto_prueba
+					"proyecto" : nombre_proyecto_prueba,
+					"crear_cromosoma" : function() {
+						var cromosoma = Array();
+						for (var i = 0; i < 10; i++) {
+							cromosoma[i] = Math.random();
+						}
+						return cromosoma;
+					}
 				};
 				MongoClient.connect(uri_mongodb_connection, function(err, db) {
 					DB = db;
@@ -51,7 +58,7 @@ vows.describe('creacion_proyecto').addBatch({
 				});
 
 			},
-			"El documento no debe ser null" : function(err, doc) {				
+			"El documento no debe ser null" : function(err, doc) {
 				DB.close();
 				assert.isNotNull(doc, "El documento no debe estar vacio");
 			}
