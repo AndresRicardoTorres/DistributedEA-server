@@ -28,6 +28,7 @@ vows.describe('creacion_proyecto').addBatch({
 	"Creacion correcta con solo opciones obligatorias" : {
 		topic : topicAPI.post(ruta_nuevo_proyecto, {
 			"proyecto" : nombre_proyecto_prueba,
+			"tamano_poblacion" : 100,
 			"crear_cromosoma" : function() {
 				var cromosoma = Array();
 				for (var i = 0; i < 10; i++) {
@@ -62,10 +63,14 @@ vows.describe('creacion_proyecto').addBatch({
 				DB.close();
 				assert.isNotNull(doc, "El documento no debe estar vacio");
 			},
-			"Debe tener una función ejecutable para crear cromosomas" : function(err,doc){
-				DB.close();				
-				eval("var prueba ="+doc.funcion_crear_cromosoma.code);				
+			"Debe tener una función ejecutable para crear cromosomas" : function(err, doc) {
+				DB.close();
+				eval("var prueba =" + doc.funcion_crear_cromosoma.code);
 				assert.isFunction(prueba);
+			},
+			"Debe tener una cantidad de poblacion": function(err,doc){			
+				DB.close();
+				assert.isNumber(doc.tamano_poblacion);
 			}
 		}
 	},
