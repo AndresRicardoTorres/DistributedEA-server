@@ -12,9 +12,15 @@ function ProjectHandler (db) {
             res.status(400);
             return res.send("{Valor de proyecto obligatorio}");
         }
-        var nombre = req.body.proyecto;
         
-        objProjectsDAO.newProject({"proyecto":nombre},function(error,doc){
+        var nombre = req.body.proyecto;
+        var funcion_crear_cromosoma = req.body.crear_cromosoma;
+        
+        console.log(req.body,'req.body');
+        
+        var nuevo_proyecto = {"proyecto":nombre,"funcion_crear_cromosoma":funcion_crear_cromosoma};
+        
+        objProjectsDAO.newProject(nuevo_proyecto,function(error,doc){
             console.log(error,"error");
             console.log(doc,"doc");
             var respuesta = {};
