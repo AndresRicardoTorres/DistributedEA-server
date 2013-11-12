@@ -23,6 +23,7 @@ vows.describe('creacion_proyecto').addBatch({
         "Deberia responder OK en JSON" : assertAPI.assertJSONResponse({"ok":true}),
         "Deberia estar en la BD" : function(){
             
+            
         }
     },
     "EL nombre del proyecto es obligatorio":{
