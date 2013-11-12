@@ -27,7 +27,14 @@ var DB = null;
 vows.describe('creacion_proyecto').addBatch({
 	"Creacion correcta con solo opciones obligatorias" : {
 		topic : topicAPI.post(ruta_nuevo_proyecto, {
-			"proyecto" : nombre_proyecto_prueba
+			"proyecto" : nombre_proyecto_prueba,
+			"crear_cromosoma" : function() {
+				var cromosoma = Array();
+				for (var i = 0; i < 10; i++) {
+					cromosoma[i] = Math.random();
+				}
+				return cromosoma;
+			}
 		}),
 		"Deberia enviar codigo OK" : assertAPI.assertStatus(200),
 		"Deberia responder OK en JSON" : assertAPI.assertJSONResponse({
@@ -37,14 +44,7 @@ vows.describe('creacion_proyecto').addBatch({
 			topic : function(error, response, body) {
 				var topicTHIS = this;
 				var query = {
-					"proyecto" : nombre_proyecto_prueba,
-					"crear_cromosoma" : function() {
-						var cromosoma = Array();
-						for (var i = 0; i < 10; i++) {
-							cromosoma[i] = Math.random();
-						}
-						return cromosoma;
-					}
+					"proyecto" : nombre_proyecto_prueba
 				};
 				MongoClient.connect(uri_mongodb_connection, function(err, db) {
 					DB = db;
@@ -61,6 +61,11 @@ vows.describe('creacion_proyecto').addBatch({
 			"El documento no debe ser null" : function(err, doc) {
 				DB.close();
 				assert.isNotNull(doc, "El documento no debe estar vacio");
+			},
+			"Debe tener una función ejecutable para crear cromosomas" : function(err,doc){
+				DB.close();				
+				eval("var prueba ="+doc.funcion_crear_cromosoma.code);				
+				assert.isFunction(prueba);
 			}
 		}
 	},
