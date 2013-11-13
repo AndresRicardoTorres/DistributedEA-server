@@ -47,9 +47,12 @@ vows.describe('creacion_proyecto').addBatch({
 				this.DB.close();
 				assert.isNotNull(doc, "El documento no debe estar vacio");
 			},
-			"Debe tener una funciÃ³n ejecutable para crear cromosomas" : function(err, doc) {
+			"Debe tener una función ejecutable para crear cromosomas" : function(err, doc) {
 				this.DB.close();
 				var prueba = null;
+				console.log(doc);
+				console.log(doc.funcion_crear_cromosoma.code);
+				if(doc.funcion_crear_cromosoma.code.length > 0){
 				eval("var prueba =" + doc.funcion_crear_cromosoma.code);
 				assert.isFunction(prueba);
 			},
