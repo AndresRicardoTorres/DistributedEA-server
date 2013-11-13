@@ -2,27 +2,25 @@
 var vows = require('vows');
 var assertAPI = require("./assertAPI");
 var topicAPI = require("./topicAPI");
-
-function make_random_string(length) {
-	var text = "";
-	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	for (var i = 0; i < length; i++)
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-	return text;
-}
-
-var nombre_proyecto_prueba = make_random_string(10);
-var ruta_nuevo_proyecto = "nuevo_proyecto";
-
-///Variables tmp
-var MongoClient = require('mongodb').MongoClient;
-var uri_mongodb_connection = 'mongodb://177.71.196.106:27017/agmp';
-var mongodb_collection_config = 'configuracion';
 var assert = require('assert');
-var DB = null;
-///END variables tmp
+
+var nombre_proyecto_prueba = "__proyecto_pruebas_correcto";
+var ruta_nuevo_proyecto = "nuevo_proyecto";
+var ruta_borrar_proyecto = "borrar_proyecto";
+var mongodb_collection_config = "configuracion";
+
+vows.describe('creacion_proyecto').addBatch({
+    "Borro primero el proyecto de prueba":{
+        topic: topicAPI.post(ruta_borrar_proyecto,{"proyecto":nombre_proyecto_prueba}),
+        "No debe estar en la BD":{
+            topic: topicAPI.findOne(mongodb_collection_config,{"proyecto":nombre_proyecto_prueba}),
+            "El documento debe ser null": function(err,doc){
+                this.DB.close();
+				assert.isNull(doc, "El documento no debe estar vacio");
+            }
+        }
+    }
+    });
 
 vows.describe('creacion_proyecto').addBatch({
 	"Creacion correcta con solo opciones obligatorias" : {
@@ -42,34 +40,21 @@ vows.describe('creacion_proyecto').addBatch({
 			"ok" : true
 		}),
 		"Deberia estar en la BD" : {
-			topic : function(error, response, body) {
-				var topicTHIS = this;
-				var query = {
+			topic :  topicAPI.findOne(mongodb_collection_config,{
 					"proyecto" : nombre_proyecto_prueba
-				};
-				MongoClient.connect(uri_mongodb_connection, function(err, db) {
-					DB = db;
-					//assert.isNotNull(err,"Hubo error en la conexion de MongoDB");
-					if (err) {
-						console.log(err);
-						return;
-					}
-					//console.log("44");
-					db.collection(mongodb_collection_config).findOne(query, topicTHIS.callback);
-				});
-
-			},
+				}),
 			"El documento no debe ser null" : function(err, doc) {
-				DB.close();
+				this.DB.close();
 				assert.isNotNull(doc, "El documento no debe estar vacio");
 			},
 			"Debe tener una función ejecutable para crear cromosomas" : function(err, doc) {
-				DB.close();
+				this.DB.close();
+				var prueba = null;
 				eval("var prueba =" + doc.funcion_crear_cromosoma.code);
 				assert.isFunction(prueba);
 			},
 			"Debe tener una cantidad de poblacion" : function(err, doc) {
-				DB.close();
+				this.DB.close();
 				assert.isNumber(doc.tamano_poblacion);
 			}
 		}

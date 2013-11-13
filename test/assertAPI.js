@@ -27,31 +27,3 @@ exports.assertJSONResponse = function(obj_test){
         }
     }
 }
-
-exports.assertMongodbFindOne = function(query){
-    return function(error, response, body){
-        if(error) {
-            console.log(error);
-            return;
-        }
-        
-        MongoClient.connect(uri_mongodb_connection, function(err, db) {
-            assert.isNotNull(err,"Hubo error en la conexion de MongoDB");
-            if(err) {
-                console.log(err);
-                return;
-            }
-            //console.log("44");
-            db.collection(mongodb_collection_config).findOne(query,function(err,doc){
-                //console.log("46");
-                assert.isNotNull(err,"Hubo error en la consulta a MongoDB");
-                if(err) {
-                    console.log(err);
-                    return;
-                }
-                console.log(doc,"51");
-                //assert.isNotNull(doc,"El documento no debe estar vacio");
-            });
-        });
-    }
-}
