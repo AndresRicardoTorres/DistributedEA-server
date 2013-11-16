@@ -10,8 +10,8 @@ function ProjectsDAO(db) {
         return new ProjectsDAO(db);
     }
 
-    var collection_name = "configuracion";
-    var projects_collection = db.collection(collection_name);
+    
+    var projects_collection = db.collection(variables.colecciones_mongodb.configuracion);
     
     this.newProject = function(project,callback){
 
@@ -20,11 +20,13 @@ function ProjectsDAO(db) {
         var permalink = name.replace( /\s/g, '_' );
         project.permalink = permalink.replace( /\W/g, '' );
         
+        project["_id"]=permalink;
+        
         project.date = new Date();
         
         /// Convert text functions to mongo functions
         project.funcion_crear_cromosoma =  mongo.Code(project.funcion_crear_cromosoma);
-console.log(project,'INSERT project');
+
         projects_collection.insert(project,function(err,doc){
             callback(err,doc);
         });
@@ -46,9 +48,25 @@ console.log(project,'INSERT project');
         }
         
         query[variables.llaves_coleccion_proyectos.ESTADO] = {"$in":[variables.estados_proyecto.CREACION]};
+        var projection = {};
+        projection[variables.llaves_coleccion_proyectos.ID]=1;
         
-        projects_collection.find(query,function(err,docs){
-            
+        var cursor = projects_collection.find(query,{})
+        
+        cursor.toArray(function(err,docs){
+              
+            if(err)throw err;
+            else{
+                var projects_names = [];
+                
+                docs.forEach(function(doc,key){
+                    if(typeof doc[variables.llaves_coleccion_proyectos.ID] == 'string'){
+                        projects_names.push(doc[variables.llaves_coleccion_proyectos.ID]);
+                    }
+                });
+                
+                callback(err,projects_names);
+            }
         });
     }
 }

@@ -1,4 +1,5 @@
 var mongo = require('mongodb');
+var variables = require("../variables");
 
 /* The DAO must be constructed with a connected database object */
 function WorksDAO(db) {
@@ -9,8 +10,20 @@ function WorksDAO(db) {
         return new WorksDAO(db);
     }
 
+    var works_collection = db.collection(variables.colecciones_mongodb.trabajo);
+    var counters_collection = db.collection(variables.colecciones_mongodb.contadores);
     this.newWork = function(work,callback){
-
+        /*
+        counters_collection.findAndModify(
+          {
+            query: { _id: name },
+            update: { $inc: { seq: 1 } },
+            new: true
+          }
+          
+        */
+        
+        works_collection.insert(work,callback);
     }
 }
 
