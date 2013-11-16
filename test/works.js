@@ -4,8 +4,8 @@ var topicAPI = require("./topicAPI");
 var assert = require('assert');
 var variables = require("../variables");
 
-
-vows.describe('asignacion_trabajos').addBatch({
+var suite = vows.describe('asignacion_trabajos');
+suite.addBatch({
     "Asignacion de un trabajo": {
         topic: topicAPI.post(variables.rutas.asignar_trabajo, {
             "proyecto": variables.proyecto_pruebas.estado_inicial
@@ -16,9 +16,13 @@ vows.describe('asignacion_trabajos').addBatch({
             }),
             "Debe tener un identificador de trabajo": function (err, doc) {
                 this.DB.close();
+                console.log(doc,"DOC");
                 assert.isNotNull(doc, "El documento no debe estar vacio");
                 assert.isNumber(doc.id);
             }
         }
     }
-}).export(module);
+});
+
+//suite.run();
+suite.export(module);
