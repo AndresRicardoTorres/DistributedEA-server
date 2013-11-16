@@ -8,8 +8,8 @@ var DB = null;
 ///END variables tmp
 
 exports.urlbase = function(){
-    //return "http://localhost:3000/";
-    return "http://agmp_servidor_-c9-andresricardotorres.c9.io/";
+    //return "http://localhost:3000";
+    return "http://agmp_servidor_-c9-andresricardotorres.c9.io";
 };
 
 exports.post = function (action,object) {

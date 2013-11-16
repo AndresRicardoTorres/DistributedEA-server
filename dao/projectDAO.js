@@ -1,4 +1,5 @@
 var mongo = require('mongodb');
+var variables = require("../variables");
 
 /* The DAO must be constructed with a connected database object */
 function ProjectsDAO(db) {
@@ -26,6 +27,25 @@ function ProjectsDAO(db) {
 
         projects_collection.insert(project,function(err,doc){
             callback(err,doc);
+        });
+    }
+    
+    
+    /*
+    * Devuelve una lista de proyectos que tienen trabajos pendientes.
+    * @param filter Object  Opciones para filtrar la busqueda de proyectos
+    *               - proyecto : Filtra por el nombre del proyecto
+    */
+    this.getAvailableWorks = function(filter,callback){
+        var query = {};
+        if(typeof filter.proyecto === 'undefined'){
+            query.permalink = filter.proyecto;
+        }
+        
+        query[variables.llaves_coleccion_proyectos.ESTADO] = {"$in":[variables.estados_proyecto.CREACION]};
+        
+        projects_collection.find(query,function(err,docs){
+            
         });
     }
 }

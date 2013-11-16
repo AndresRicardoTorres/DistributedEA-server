@@ -1,16 +1,22 @@
 //var ContentHandler = require('./content')
 var ErrorHandler = require('./error').errorHandler;
 var ProjectHandler = require('./project');
+var WorkHandler = require('./work');
+var variables = require("../variables");
 
 module.exports = exports = function(app,db) {
     /// handlers
     var projectHandler = new ProjectHandler(db);
-    
+    var workHandler= new WorkHandler(db);
+  
     ///Common middlewares
     ///app.use(contentHandler.log_coneection);
     
    ///routes    
-   app.post('/nuevo_proyecto', projectHandler.handleNewProject);
+   
+   app.post(variables.rutas.nuevo_proyecto, projectHandler.handleNewProject);
+   
+   app.post(variables.rutas.asignar_trabajo, workHandler.handleNewAsign);
    
    app.get('/', function(req, res, next) {
         var body = '{"msg":"Hello World"}';
