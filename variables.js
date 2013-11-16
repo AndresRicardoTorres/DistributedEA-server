@@ -15,5 +15,6 @@ exports.estados_proyecto = {
     CREACION:1
 }
 exports.llaves_coleccion_proyectos = {
-    ESTADO : 'estado'
+    ESTADO : 'estado',
+    NOMBRE : 'proyecto'
 }

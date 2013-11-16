@@ -24,12 +24,15 @@ function ProjectsDAO(db) {
         
         /// Convert text functions to mongo functions
         project.funcion_crear_cromosoma =  mongo.Code(project.funcion_crear_cromosoma);
-
+console.log(project,'INSERT project');
         projects_collection.insert(project,function(err,doc){
             callback(err,doc);
         });
     }
     
+    this.remove= function(query,callback){
+        projects_collection.remove(query,callback);
+    }
     
     /*
     * Devuelve una lista de proyectos que tienen trabajos pendientes.

@@ -5,7 +5,8 @@ var topicAPI = require("./topicAPI");
 var assert = require('assert');
 var variables = require("../variables");
 
-vows.describe('eliminacion_proyecto').addBatch({
+var suite = vows.describe('CRUD proyecto');
+suite.addBatch({
     "Borro primero el proyecto de prueba": {
         topic: topicAPI.post(variables.rutas.borrar_proyecto, {
             "proyecto": variables.proyecto_pruebas.estado_inicial
@@ -15,14 +16,14 @@ vows.describe('eliminacion_proyecto').addBatch({
                 "proyecto": variables.proyecto_pruebas.estado_inicial
             }),
             "El documento debe ser null": function (err, doc) {
+                //console.log(doc,'doc DELETE');
                 this.DB.close();
                 assert.isNull(doc, "El documento no debe estar vacio");
             }
         }
     }
 });
-
-vows.describe('creacion_proyecto').addBatch({
+suite.addBatch({
     "Creacion correcta con solo opciones obligatorias": {
         topic: topicAPI.post(variables.rutas.nuevo_proyecto, {
             "proyecto": variables.proyecto_pruebas.estado_inicial,
@@ -61,7 +62,8 @@ vows.describe('creacion_proyecto').addBatch({
             },
             "Su estado debe ser de CREACION": function (err, doc) {
                 this.DB.close();
-                assert.equal(doc[variables.llaves_coleccion_proyectos], variables.estados_proyecto.CREACION);
+                assert.isNumber(doc[variables.llaves_coleccion_proyectos.ESTADO]);
+                assert.equal(doc[variables.llaves_coleccion_proyectos.ESTADO], variables.estados_proyecto.CREACION);
             }
         }
     },
@@ -70,5 +72,6 @@ vows.describe('creacion_proyecto').addBatch({
         "Deberia enviar codigo de error": assertAPI.assertStatus(400)
     },
     "Crear un proyecto con el nombre de uno ya creado": {}
-//}).export(module);
-}).run()
+});
+suite.run();
+//suite.export(module);

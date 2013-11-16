@@ -15,6 +15,7 @@ module.exports = exports = function(app,db) {
    ///routes    
    
    app.post(variables.rutas.nuevo_proyecto, projectHandler.handleNewProject);
+   app.post(variables.rutas.borrar_proyecto, projectHandler.handleDeleteProject)
    
    app.post(variables.rutas.asignar_trabajo, workHandler.handleNewAsign);
    
