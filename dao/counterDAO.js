@@ -15,15 +15,16 @@ function countersDAO(db) {
     this.next = function (counter_name, callback) {
         counters_collection.findAndModify({
             "_id": counter_name
-        }, {
+        }, {}, {
             "$inc": {
                 "seq": 1
             }
         }, {
-            "new": true
+            "new": true,
+            "upsert": true
         }, function (err, object) {
-            if(err)throw err;
-            callback(err, object);
+            if (err) throw err;
+            callback(err, object.seq);
         });
     };
 }

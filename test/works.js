@@ -16,7 +16,6 @@ suite.addBatch({
             }),
             "Debe tener un identificador de trabajo": function (err, doc) {
                 this.DB.close();
-                console.log(doc,"DOC");
                 assert.isNotNull(doc, "El documento no debe estar vacio");
                 assert.isNumber(doc.id);
             }
