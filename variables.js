@@ -23,3 +23,6 @@ exports.llaves_coleccion_proyectos = {
 exports.llaves_coleccion_trabajos = {
     PROYECTO : 'proyecto'
 };
+exports.secuencias={
+    IDENTIFICADOR_TRABAJO : 'identificador_trabajo'  
+};

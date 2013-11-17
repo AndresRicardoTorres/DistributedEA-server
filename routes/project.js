@@ -58,8 +58,8 @@ function ProjectHandler(db) {
         
         var query = {};
         query[variables.llaves_coleccion_proyectos.NOMBRE] = nombre;
-        objProjectsDAO.remove(query,function(error,numberOfRemovedDocs){
-            var respuesta = {ok:true,n:numberOfRemovedDocs};
+        objProjectsDAO.remove(query,function(error,numberOfRemovedProyects){
+            var respuesta = {ok:true,n:numberOfRemovedProyects};
             res.status(200);
             res.send(JSON.stringify(respuesta));
         });

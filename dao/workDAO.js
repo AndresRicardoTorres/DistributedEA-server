@@ -1,5 +1,6 @@
 var mongo = require('mongodb');
 var variables = require("../variables");
+var CountersDAO = require('../dao/counterDAO').CountersDAO;
 
 /* The DAO must be constructed with a connected database object */
 function WorksDAO(db) {
@@ -9,21 +10,19 @@ function WorksDAO(db) {
         console.log('Warning: ProjectsDAO constructor called without "new" operator');
         return new WorksDAO(db);
     }
-
+    var objCountersDAO = new CountersDAO(db);
     var works_collection = db.collection(variables.colecciones_mongodb.trabajo);
-    var counters_collection = db.collection(variables.colecciones_mongodb.contadores);
     this.newWork = function(work,callback){
-        /*
-        counters_collection.findAndModify(
-          {
-            query: { _id: name },
-            update: { $inc: { seq: 1 } },
-            new: true
-          }
-          
-        */
-        
-        works_collection.insert(work,callback);
+        objCountersDAO.next(variables.secuencias.IDENTIFICADOR_TRABAJO,function(error,secuencia){
+            console.dir(secuencia,'NEW secuencia');
+            work.id = secuencia;
+            console.dir(work,'NEW work');
+            works_collection.insert(work,callback);
+        });
+    }
+    
+    this.remove=function(query,callback){
+        works_collection.remove(query,callback);
     }
 }
 

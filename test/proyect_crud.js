@@ -20,6 +20,16 @@ suite.addBatch({
                 this.DB.close();
                 assert.isNull(doc, "El documento no debe estar vacio");
             }
+        },
+        "Tampoco debe haber trabajos en la BD": {
+            topic: topicAPI.findOne(variables.colecciones_mongodb.trabajo, {
+                "proyecto": variables.proyecto_pruebas.estado_inicial
+            }),
+            "El documento debe ser null": function (err, doc) {
+                //console.log(doc,'doc DELETE');
+                this.DB.close();
+                assert.isNull(doc, "El documento no debe estar vacio");
+            }
         }
     }
 });
