@@ -23,6 +23,20 @@ suite.addBatch({
 			"Debe tener un tipo" : function(err, doc) {
 				this.DB.close();
 				assert.isNumber(doc.tipo);
+			},
+			"Debe ser entregable" : {
+				topic : function(err, doc) {
+
+					topicAPI.post(variables.rutas.entregar_trabajo, {
+						id_trabajo : doc.id,
+						resultado : []
+					}, {
+						'hola':'hola',
+						'this' : this
+					})();
+
+				},
+				"Deberia enviar codigo OK" : assertAPI.assertStatus(200),
 			}
 		},
 		"Deberia enviar codigo OK" : assertAPI.assertStatus(200),

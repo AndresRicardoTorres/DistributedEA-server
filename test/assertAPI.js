@@ -5,7 +5,7 @@ var uri_mongodb_connection = 'mongodb://177.71.196.106:27017/agmp';
 var mongodb_collection_config = 'configuracion';
 
 exports.assertStatus = function(code) {
-	return function(error, response, body) {
+	return function(error, response, body) {		
 		assert.isObject(response);
 		assert.equal(response.statusCode, code);
 	};

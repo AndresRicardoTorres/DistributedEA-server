@@ -1,7 +1,8 @@
 exports.rutas = {
     nuevo_proyecto: "/nuevo_projecto",
     borrar_proyecto: "/borrar_proyecto",
-    asignar_trabajo: "/asignar_trabajo"
+    asignar_trabajo: "/asignar_trabajo",
+    entregar_trabajo: '/entregar_trabajo'
 };
 exports.colecciones_mongodb = {
     configuracion: "configuracion",
