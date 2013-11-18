@@ -60,11 +60,15 @@ suite.addBatch({
             },
             "Debe tener una función ejecutable para crear cromosomas": function (err, doc) {
                 this.DB.close();
+                                                
+                assert.notEqual(doc.funcion_crear_cromosoma.code.length,0);
+                
                 var prueba = null;
-                if (doc.funcion_crear_cromosoma.code.length > 0) {
-                    eval("var prueba =" + doc.funcion_crear_cromosoma.code);
-                    assert.isFunction(prueba);
-                }
+				eval("var prueba =" + doc.funcion_crear_cromosoma.code);								
+				assert.isFunction(prueba);
+				 
+                var un_arreglo = prueba();
+                assert.isNotNull(un_arreglo);
             },
             "Debe tener una cantidad de poblacion": function (err, doc) {
                 this.DB.close();

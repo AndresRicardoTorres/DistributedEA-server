@@ -14,14 +14,24 @@ exports.urlbase = function () {
 
 exports.post = function (action, object) {
     return function () {
+    	
+    	///Convierto funciones a string, esto no era necesario
+    	for (var i in object) {
+    		if(typeof object[i] === 'function'){
+    			object[i] = ''+object[i];
+    		}
+    	}
+    	
         var options = {
             "method": "POST",
             "url": exports.urlbase() + action,
             "form": object
         };
+        //console.log("action >>> "+action);
+        //console.dir(object,"object >>> ");
         request(options, this.callback);
     };
-}
+};
 
 exports.findOne = function (collection, query) {
     return function (error, response, body) {
@@ -30,5 +40,5 @@ exports.findOne = function (collection, query) {
             topicTHIS.DB = db;
             db.collection(collection).findOne(query, topicTHIS.callback);
         });
-    }
-}
+    };
+};
