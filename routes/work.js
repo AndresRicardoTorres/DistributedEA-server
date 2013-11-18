@@ -25,37 +25,47 @@ function WorkHandler(db) {
 
         objProjectsDAO.getAvailableWorks(filtros, function (error, projects_with_work) {
             if (error) throw error;
+            var respuesta = {};
             //console.log(filtros,'filtros');
             //console.log(projects_with_work, 'projects_with_work');
             var proyecto_escogido = THIS.chooseProject(projects_with_work);
-            //console.log(proyecto_escogido, 'proyecto_escogido');
+            console.log(proyecto_escogido, 'proyecto_escogido');
 
             if (null === proyecto_escogido) {
                 res.status(400);
-                var respuesta = {};
                 respuesta.ok = false;
+                
                 return res.send(JSON.stringify(respuesta));
             }
             else {
-
                 var aWork = {};
                 aWork[variables.llaves_coleccion_trabajos.PROYECTO] = proyecto_escogido[variables.llaves_coleccion_proyectos.NOMBRE];
                 aWork[variables.llaves_coleccion_trabajos.TIPO] = proyecto_escogido[variables.llaves_coleccion_proyectos.ESTADO];
 
                 objWorksDAO.newWork(aWork, function (err, doc) {
                     if (err) throw err;
+                    if (doc.length === 0) {
+                        res.status(400);
+                        respuesta.ok = false;
+                        return res.send(JSON.stringify(respuesta));
+                    }
+                    
+                    doc = doc[0];
 
                     res.status(200);
-                    var respuesta = {};
                     respuesta.ok = true;
                     respuesta.id_trabajo = doc.id;
                     respuesta.tipo_trabajo = doc[variables.llaves_coleccion_trabajos.TIPO];
+                    respuesta.funcion_creacion = proyecto_escogido[variables.llaves_coleccion_proyectos.FUNCION_CREAR];
+                    
                     return res.send(JSON.stringify(respuesta));
                 });
             }
+
+
         });
 
 
-    }
+    };
 }
 module.exports = WorkHandler;

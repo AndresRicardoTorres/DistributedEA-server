@@ -7,20 +7,20 @@ function ProjectHandler(db) {
 
     this.handleNewProject = function (req, res, next) {
 
-        if (typeof req.body.proyecto === "undefined") {
-            console.log(400);
+        if (typeof req.body.proyecto === "undefined" || typeof req.body.crear_cromosoma === "undefined") {
             res.status(400);
             var respuesta = {};
             respuesta.error = "Valor de proyecto obligatorio";
             return res.send(JSON.stringify(respuesta));
         }
+        
+
 
         var nombre = req.body.proyecto;
         var funcion_crear_cromosoma = req.body.crear_cromosoma;
         var tamano_poblacion = parseInt(req.body.tamano_poblacion,10);
 
         ///TODO: validar los tipos de datos
-
 
         var nuevo_proyecto = {
             "proyecto": nombre,
@@ -30,8 +30,7 @@ function ProjectHandler(db) {
         nuevo_proyecto[variables.llaves_coleccion_proyectos.ESTADO] = variables.estados_proyecto.CREACION;
 
         objProjectsDAO.newProject(nuevo_proyecto, function (error, doc) {
-            console.log(error, "error");
-            console.log(doc, "doc");
+            
             var respuesta = {};
             if (doc) {
                 respuesta.ok = true;
