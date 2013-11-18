@@ -29,7 +29,7 @@ function WorkHandler(db) {
             //console.log(filtros,'filtros');
             //console.log(projects_with_work, 'projects_with_work');
             var proyecto_escogido = THIS.chooseProject(projects_with_work);
-            console.log(proyecto_escogido, 'proyecto_escogido');
+            //console.log(proyecto_escogido, 'proyecto_escogido');
 
             if (null === proyecto_escogido) {
                 res.status(400);
@@ -56,8 +56,7 @@ function WorkHandler(db) {
                     respuesta.ok = true;
                     respuesta.id_trabajo = doc.id;
                     respuesta.tipo_trabajo = doc[variables.llaves_coleccion_trabajos.TIPO];
-                    respuesta.funcion_creacion = proyecto_escogido[variables.llaves_coleccion_proyectos.FUNCION_CREAR];
-                    
+                    respuesta.funcion_creacion = proyecto_escogido[variables.llaves_coleccion_proyectos.FUNCION_CREAR].code;
                     return res.send(JSON.stringify(respuesta));
                 });
             }
