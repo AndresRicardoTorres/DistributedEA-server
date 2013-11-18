@@ -18,6 +18,7 @@ module.exports = exports = function(app,db) {
    app.post(variables.rutas.borrar_proyecto, projectHandler.handleDeleteProject)
    
    app.post(variables.rutas.asignar_trabajo, workHandler.handleNewAsign);
+   app.post(variables.rutas.entregar_trabajo, workHandler.handleReceiveTask)
    
    app.get('/', function(req, res, next) {
         var body = '{"msg":"Hello World"}';

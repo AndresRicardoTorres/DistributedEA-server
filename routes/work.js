@@ -57,6 +57,7 @@ function WorkHandler(db) {
                     respuesta.id_trabajo = doc.id;
                     respuesta.tipo_trabajo = doc[variables.llaves_coleccion_trabajos.TIPO];
                     respuesta.funcion_creacion = proyecto_escogido[variables.llaves_coleccion_proyectos.FUNCION_CREAR].code;
+                    respuesta.cantidad_poblacion = 100;
                     return res.send(JSON.stringify(respuesta));
                 });
             }
@@ -65,6 +66,22 @@ function WorkHandler(db) {
         });
 
 
+    };
+    
+    this.handleReceiveTask = function(req, res, next){
+        var respuesta = {};
+        console.log(req.body,'req.body');
+        var work_id = parseInt(req.body.id_trabajo);
+        
+        console.log(work_id,'work_id');
+        /*
+        objWorksDAO.getById(work_id,function(err,aWork){
+            
+        });
+        */
+        
+        res.status(200);
+        return  res.send(JSON.stringify(respuesta));
     };
 }
 module.exports = WorkHandler;
