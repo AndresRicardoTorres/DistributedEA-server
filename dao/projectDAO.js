@@ -67,15 +67,15 @@ function ProjectsDAO(db) {
 
             if (err) throw err;
             else {
-                var projects_names = [];
+                var projects = [];
 
                 docs.forEach(function (doc, key) {
                     if (typeof doc[variables.llaves_coleccion_proyectos.ID] == 'string') {
-                        projects_names.push(doc[variables.llaves_coleccion_proyectos.ID]);
+                        projects.push(doc);
                     }
                 });
 
-                callback(err, projects_names);
+                callback(err, projects);
             }
         });
     }

@@ -21,7 +21,8 @@ exports.llaves_coleccion_proyectos = {
 };
 
 exports.llaves_coleccion_trabajos = {
-    PROYECTO : 'proyecto'
+    PROYECTO : 'proyecto',
+    TIPO : 'tipo'
 };
 exports.secuencias={
     IDENTIFICADOR_TRABAJO : 'identificador_trabajo'  

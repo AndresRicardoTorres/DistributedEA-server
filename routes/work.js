@@ -6,6 +6,14 @@ function WorkHandler (db) {
     
     var objWorksDAO = new WorksDAO(db);
     var objProjectsDAO = new ProjectsDAO(db);
+    var THIS = this;
+    
+    this.chooseProject= function(array_projects){
+        if (array_projects.length > 0) {
+            return array_projects[0];
+        }
+        return null;
+    }
     
     this.handleNewAsign= function(req, res, next) {
         var filtros = {};
@@ -17,15 +25,20 @@ function WorkHandler (db) {
         
         objProjectsDAO.getAvailableWorks(filtros,function(error,projects_with_work){
             if(error)throw error;
-            
             console.log(projects_with_work,'projects_with_work');
+            var proyecto_escogido = THIS.chooseProject(projects_with_work);
+            console.log(proyecto_escogido,'proyecto_escogido');
             var aWork = {};
-            aWork[variables.llaves_coleccion_trabajos.PROYECTO]=projects_with_work[0];
+            aWork[variables.llaves_coleccion_trabajos.PROYECTO]=proyecto_escogido[variables.llaves_coleccion_proyectos.NOMBRE];
+            aWork[variables.llaves_coleccion_trabajos.TIPO]=proyecto_escogido[variables.llaves_coleccion_proyectos.ESTADO];
+            
             objWorksDAO.newWork(aWork,function(err,doc){
-                
+                if(err)throw err;
                 res.status(400);
                 var respuesta = {};
                 respuesta.ok = true;
+                respuesta.id_trabajo = doc.id;
+                respuesta.tipo_trabajo = doc[variables.llaves_coleccion_trabajos.TIPO];
                 return res.send(JSON.stringify(respuesta));    
             });
         });
