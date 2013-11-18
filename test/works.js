@@ -6,6 +6,7 @@ var assert = require('assert');
 var variables = require("../variables");
 
 var suite = vows.describe('asignacion_trabajos');
+var id_trabajo_asignado = null;
 suite.addBatch({
 	"Asignacion de un trabajo" : {
 		topic : topicAPI.post(variables.rutas.asignar_trabajo, {
@@ -19,24 +20,11 @@ suite.addBatch({
 				this.DB.close();
 				assert.isNotNull(doc, "El documento no debe estar vacio");
 				assert.isNumber(doc.id);
+				id_trabajo_asignado = parseInt(doc.id);
 			},
 			"Debe tener un tipo" : function(err, doc) {
 				this.DB.close();
 				assert.isNumber(doc.tipo);
-			},
-			"Debe ser entregable" : {
-				topic : function(err, doc) {
-
-					topicAPI.post(variables.rutas.entregar_trabajo, {
-						id_trabajo : doc.id,
-						resultado : []
-					}, {
-						'hola':'hola',
-						'this' : this
-					})();
-
-				},
-				"Deberia enviar codigo OK" : assertAPI.assertStatus(200),
 			}
 		},
 		"Deberia enviar codigo OK" : assertAPI.assertStatus(200),
@@ -60,6 +48,16 @@ suite.addBatch({
 		"Deberia responder OK en JSON" : assertAPI.assertJSONResponse({
 			"ok" : false
 		}),
+	}
+});
+
+suite.addBatch({
+	"Debe ser entregable" : {
+		topic : topicAPI.post(variables.rutas.entregar_trabajo, {
+			id_trabajo : id_trabajo_asignado,
+			resultado : [1, 2, 3]
+		}),
+		"Deberia enviar codigo OK" : assertAPI.assertStatus(200)
 	}
 });
 
