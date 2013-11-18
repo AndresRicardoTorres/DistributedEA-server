@@ -19,7 +19,7 @@ exports.llaves_coleccion_proyectos = {
     ESTADO: 'estado',
     NOMBRE: 'proyecto',
     ID: 'permalink',
-    FUNCTION_CREAR: 'funcion_crear_cromosoma'
+    FUNCION_CREAR: 'funcion_crear_cromosoma'
 };
 
 exports.llaves_coleccion_trabajos = {
