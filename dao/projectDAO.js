@@ -29,6 +29,7 @@ function ProjectsDAO(db) {
         project.funcion_crear_cromosoma = mongo.Code(project.funcion_crear_cromosoma);
 
         projects_collection.insert(project, function (err, doc) {
+            
             callback(err, doc);
         });
     }
