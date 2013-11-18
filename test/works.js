@@ -18,6 +18,10 @@ suite.addBatch({
                 this.DB.close();
                 assert.isNotNull(doc, "El documento no debe estar vacio");
                 assert.isNumber(doc.id);
+            },
+            "Debe tener un tipo": function(err,doc){
+            	this.DB.close();
+            	assert.isNumber(doc.tipo);
             }
         }
     }
