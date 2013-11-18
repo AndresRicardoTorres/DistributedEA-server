@@ -51,7 +51,7 @@ function ProjectsDAO(db) {
      */
     this.getAvailableWorks = function (filter, callback) {
         var query = {};
-        if (typeof filter.proyecto === 'undefined') {
+        if (typeof filter.proyecto === 'string') {
             query.permalink = filter.proyecto;
         }
 
