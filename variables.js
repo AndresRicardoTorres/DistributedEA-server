@@ -24,6 +24,7 @@ exports.llaves_coleccion_proyectos = {
 
 exports.llaves_coleccion_trabajos = {
     PROYECTO: 'proyecto',
+    PROYECTO_ID : 'proyecto_id',
     TIPO: 'tipo'
 };
 exports.secuencias = {

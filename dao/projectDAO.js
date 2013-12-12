@@ -1,6 +1,7 @@
 var mongo = require('mongodb');
 var variables = require("../variables");
-var WorksDAO = require('../dao/workDAO').WorksDAO;
+var WorksDAO = require('../dao/workDAO').WorksDAO
+var GeneticDAO = require("../dao/geneticDAO");
 
 /* The DAO must be constructed with a connected database object */
 function ProjectsDAO(db) {
@@ -80,6 +81,24 @@ function ProjectsDAO(db) {
             }
         });
     }
+    
+    this.getById = function(id,callback){
+        projects_collection.findOne({"permalink":id},function(err,doc){
+            callback(err,doc);
+        });
+    };
+    
+    this.finishWork = function(id,callback){
+        this.getById(id,function(err,aProject){
+            
+               var objGeneticDAO = new GeneticDAO(db,aProject[variables.llaves_coleccion_proyectos.ID]);
+               
+               //objGeneticDAO
+            
+            
+            callback();    
+        });
+    };
 }
 
 module.exports.ProjectsDAO = ProjectsDAO;

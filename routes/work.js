@@ -1,5 +1,6 @@
 var WorksDAO = require('../dao/workDAO').WorksDAO;
 var ProjectsDAO = require('../dao/projectDAO').ProjectsDAO;
+var GeneticDAO = require('../dao/geneticDAO');
 var variables = require("../variables");
 
 function WorkHandler(db) {
@@ -40,6 +41,7 @@ function WorkHandler(db) {
             else {
                 var aWork = {};
                 aWork[variables.llaves_coleccion_trabajos.PROYECTO] = proyecto_escogido[variables.llaves_coleccion_proyectos.NOMBRE];
+                aWork[variables.llaves_coleccion_trabajos.PROYECTO_ID] = proyecto_escogido[variables.llaves_coleccion_proyectos.ID];
                 aWork[variables.llaves_coleccion_trabajos.TIPO] = proyecto_escogido[variables.llaves_coleccion_proyectos.ESTADO];
 
                 objWorksDAO.newWork(aWork, function (err, doc) {
@@ -71,14 +73,35 @@ function WorkHandler(db) {
     this.handleReceiveTask = function(req, res, next){
         var respuesta = {};
         console.log(req.body,'req.body');
-        var work_id = parseInt(req.body.id_trabajo);
+        var work_id = parseInt(req.body.id_trabajo,10);
+        var resultado = req.body.resultado;
         
-        console.log(work_id,'work_id');
-        /*
+        
         objWorksDAO.getById(work_id,function(err,aWork){
             
+            switch (aWork[variables.llaves_coleccion_trabajos.TIPO]) {
+                case variables.estados_proyecto.CREACION:
+                    var objGeneticDAO = new GeneticDAO(db,aWork[variables.llaves_coleccion_trabajos.PROYECTO_ID]);
+                    if(typeof resultado == "object"){
+                        
+                        objGeneticDAO.createChromosome(resultado,function(err,success){
+                            if(success){
+                                objProjectsDAO.finishWork(aWork[variables.llaves_coleccion_trabajos.PROYECTO_ID]);
+                                
+                                
+                                
+                                return res.send(JSON.stringify(respuesta));
+                            }
+                        }); 
+                        
+                        
+                    }
+                    
+                    break;
+                
+            }    
         });
-        */
+        
         
         res.status(200);
         return  res.send(JSON.stringify(respuesta));
