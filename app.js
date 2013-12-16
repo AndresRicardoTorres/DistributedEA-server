@@ -4,7 +4,7 @@ var MongoClient = require('mongodb').MongoClient // Driver for connecting to Mon
 var Server = require("./Server.js");
 
 
-MongoClient.connect('mongodb://localhost:27017/agmp', function(err, db) {
+MongoClient.connect('mongodb://eva05.local:37017,eva04.local:37017,eva03.local:37017/agmp', function(err, db) {
     if(err) {console.log(err);}
     
     var aServer = Server(db,function(isReady){

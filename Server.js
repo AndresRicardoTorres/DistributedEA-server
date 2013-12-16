@@ -104,6 +104,7 @@ function Server(database,mainCallback){
 	  if(err)console.log("ERROR!"+err);
 	});
       }
+      
       getActualGeneration(0,function(){
 	  if(project === null || actualGeneration === null){
 	    mainCallback(false);
