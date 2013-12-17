@@ -34,11 +34,10 @@ function Server(database,mainCallback){
 	eval("project.crossoverFunction = "+doc.crossoverFunction.code);
 	
 //  	console.log(JSON.stringify({a:project}),'AAAA');
-	populationCollection.count({},function(err,count){
+	populationCollection.count({generation:0},function(err,count){
 // 	  console.log(project.populationTotal,'project.populationTotal');
-	  
-	  for(var i=count;i<project.populationTotal;i++){
-	    console.log(i);
+	  console.log('Individuos en la generacion 0 => '+count);
+	  for(var i=count;i<project.populationTotal;i++){	    
 	    var aChromosome=project.creationFunction();
 	    var aIndividual={
 	      generation:0,

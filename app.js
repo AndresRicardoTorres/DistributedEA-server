@@ -20,7 +20,8 @@ MongoClient.connect('mongodb://eva05.local:37017,eva04.local:37017,eva03.local:3
 		  this.handleRequest(req,function(subPopulation,project,actualGeneration,estimatedTime){
 		    if(project == null)
 		    {
-		      var respuesta = {finalized:true};		      
+		      var respuesta = {finalized:true};
+		      httpServer.close();
 		    }else{
 
 		      console.log("Envio "+subPopulation.length+" individuos");
@@ -37,7 +38,8 @@ MongoClient.connect('mongodb://eva05.local:37017,eva04.local:37017,eva03.local:3
 		    res.end(JSON.stringify(respuesta ));
 		  });
 		break;
-	      case 'deliver' :		  
+	      case 'deliver' :
+		  req.newChromosomes = JSON.parse(req.newChromosomes)
 		  console.log("Recibo "+req.newChromosomes.length+" individuos");
 		  if(!req.newChromosomes instanceof Array){
 		    console.log(req);
@@ -53,20 +55,27 @@ MongoClient.connect('mongodb://eva05.local:37017,eva04.local:37017,eva03.local:3
 	
 	///process.env.PORT variable for use in cloud9
 	var port = 8000;
-	
-	http.createServer(function (request, response) {
+	var contador_conexion = 0;
+	var httpServer = http.createServer(function (request, response) {
+	  
 	  if (request.method == 'POST') {
 	    var requestBody = '';
 	    request.on('data', function(data) {
 	      requestBody += data;	      
 	    });
 	    request.on('end', function() {
+	      console.log("### INICIO ###"+contador_conexion);
 	      console.log(requestBody,'requestBody');
 	      var formData = qs.parse(requestBody);
 	      process(formData,response);	      
+	      console.log("### FIN ###"+contador_conexion);
 	    });
 	  }
-	}).listen(port);	
+	  
+	  contador_conexion++;
+	});
+	
+	httpServer.listen(port);
 	console.log('Server listening on port '+port);
 	
       }else{
