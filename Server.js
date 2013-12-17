@@ -34,11 +34,10 @@ function Server(database,mainCallback){
 	eval("project.crossoverFunction = "+doc.crossoverFunction.code);
 	
 //  	console.log(JSON.stringify({a:project}),'AAAA');
-	populationCollection.count({},function(err,count){
+	populationCollection.count({generation:0},function(err,count){
 // 	  console.log(project.populationTotal,'project.populationTotal');
-	  
-	  for(var i=count;i<project.populationTotal;i++){
-	    console.log(i);
+	  console.log('Individuos en la generacion 0 => '+count);
+	  for(var i=count;i<project.populationTotal;i++){	    
 	    var aChromosome=project.creationFunction();
 	    var aIndividual={
 	      generation:0,
@@ -159,13 +158,20 @@ function Server(database,mainCallback){
     ///The estimated time for a one job
     var idealAmount = Math.ceil(idealTime/project.estimatedTime);
     var realAmmount = Math.min(idealAmount,amount);
-    
+    var positions = new Array();
     var randomPositions = new Array();
+            
     for(var i=0;i<realAmmount;i++)
     {
-      randomPositions.push(requestRandomInteger(project.populationTotal));
+      var random = requestRandomInteger(project.populationTotal);
+      while(positions[random]){
+	random = requestRandomInteger(project.populationTotal);
+      }
+      positions[random]=true;
+      randomPositions.push(random);
     }
-//     console.log(randomPositions,'randomPositions');
+    
+    console.log(randomPositions.length,'randomPositions');
     populationCollection.find({'generation':actualGeneration,'position':{'$in':randomPositions}},{'chromosome':1,'_id':0}).toArray(function(err,individuals){
       if(err)console.log(err,'err');
       var chromosomes = new Array();
@@ -178,13 +184,17 @@ function Server(database,mainCallback){
   }
   
   function searchNextGeneration(callback){
+    console.log("searchNextGeneration");
     var nextGeneration = actualGeneration+1;
     populationCollection.count({generation:nextGeneration},function(err,countNextGeneration){
+      if(err)console.log("ERROR! "+err);
+      console.log("Hay "+countNextGeneration+" en la generation "+nextGeneration+" en la BD");
       var difference = project.populationTotal -countNextGeneration;
       if(difference>0)
       {	
 	callback(difference);
       }else{
+	console.log("AUMENTO LA GENERACION");
 	actualGeneration++;
 	searchNextGeneration(callback);
       }
@@ -192,11 +202,10 @@ function Server(database,mainCallback){
   }
     
   this.handleRequest= function(request,callback){
-    console.log("handleRequest");
-    
+        
     if(actualGeneration < project.generationLimit){
       searchNextGeneration(function(difference){
- 	console.log(difference,'difference');
+ 	console.log('FALTAN '+difference+" EN LA GENERACION "+(actualGeneration+1));
 	generateSubpopulation(difference,function(subPopulation){
 		callback(subPopulation,project,actualGeneration,project.estimatedTime);
 	    });
@@ -213,8 +222,9 @@ function Server(database,mainCallback){
   
   ///TODO:Update statics
   this.handleDeliver= function(request,callback){
-    console.log(request.newChromosomes.length,'ME LLEGARON');
+    
     populationCollection.count({generation:request.generation},function(err,countGeneration){
+      console.log("Hay "+countGeneration+" en la generation "+request.generation+" en la BD");
     for(var i=0;i<request.newChromosomes.length;i++){
       
 	var aIndividual={
