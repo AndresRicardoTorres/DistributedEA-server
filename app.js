@@ -1,86 +1,54 @@
+var MongoClient = require('mongodb').MongoClient;
 var http = require('http');
 var qs = require('querystring');
-var MongoClient = require('mongodb').MongoClient // Driver for connecting to MongoDB
+var async = require('async');
 var Server = require("./Server.js");
+var configuration = require("./config.js");
 
-MongoClient.connect('mongodb://eva05.local:37017,eva04.local:37017,eva03.local:37017/agmp', function(err, db) {
-    if(err) {console.log(err);}
+MongoClient.connect(configuration.urlMongo, function(err, db) {
+    if(err) {console.error(err);}
     
-    var aServer = Server(db,function(isReady){
-      
-
-      if(isReady){
-	
-	function process(req,res){
-	  console.log("\n---ACTION "+req.action+'---');
-	  console.log(req,"REQ");
-	  if(typeof req.action != 'undefined'){
-	    switch(req.action){
-	      case 'request':
-		  this.handleRequest(req,function(subPopulation,project,actualGeneration,estimatedTime){
-		    if(project == null)
-		    {
-		      var respuesta = {finalized:true};
-		      httpServer.close();
-		    }else{
-
-		      console.log("Envio "+subPopulation.length+" individuos");
-		      var respuesta = {
-			generation:actualGeneration,
-			subPopulation:subPopulation,
-			estimatedTime:estimatedTime
-		      };
-		      if(req.assignedProject == 'false'){
-			respuesta.assignedProject=project;
-		      }
-		    }
-		    
-		    res.end(JSON.stringify(respuesta ));
-		  });
-		break;
-	      case 'deliver' :
-		  req.newChromosomes = JSON.parse(req.newChromosomes)
-		  console.log("Recibo "+req.newChromosomes.length+" individuos");
-		  if(!req.newChromosomes instanceof Array){
-		    console.log(req);
-		  }
-		  if(typeof req.newChromosomes.length)
-		  this.handleDeliver(req,function(){
-		     res.end(JSON.stringify({ok:true}));
-		  });
-		break;
-	    }
-	  }
-	}
-	
-	///process.env.PORT variable for use in cloud9
-	var port = 8000;
-	var contador_conexion = 0;
+    var aServer = Server(db,function(error,isReady){
+      if(error) {console.error(error);}
+	var THIS = this;
 	var httpServer = http.createServer(function (request, response) {
-	  
 	  if (request.method == 'POST') {
 	    var requestBody = '';
-	    request.on('data', function(data) {
-	      requestBody += data;	      
-	    });
-	    request.on('end', function() {
-	      console.log("### INICIO ###"+contador_conexion);
-	      console.log(requestBody,'requestBody');
+	    request.on('data', function(data) {requestBody +=data;});
+	    request.on('end', function() {	      
 	      var formData = qs.parse(requestBody);
-	      process(formData,response);	      
-	      console.log("### FIN ###"+contador_conexion);
+	      var aTask = {
+		server:THIS,
+		data:formData,
+		response:response
+	      }
+	      aQueue.push(aTask,function(err){
+		if(err)console.error("ERROR en push "+err);
+		 console.log("###END### "+(queueCount++));
+	      });
 	    });
 	  }
-	  
-	  contador_conexion++;
 	});
 	
-	httpServer.listen(port);
-	console.log('Server listening on port '+port);
+	httpServer.listen(configuration.httpPort);
+	console.log('Server listening on port '+configuration.httpPort);
 	
-      }else{
-	console.log("Projects not found");
-	db.close();
-      }
+	httpServer.on('close',function(){
+	  console.log('Server is shutdown ');
+	  db.close();	  
+	});
     });
+    
+    var queueCount = 0;
+    var aQueue = async.queue(function(task,callback){
+      console.log("###BEGIN### "+queueCount);
+      task.server.processCommunication(task.data,function(error,answer){
+	task.response.end(answer);
+	if(typeof answer.finalized != 'undefined' && answer.finalized){
+	  httpServer.close();
+	}
+	callback();
+      });
+    },1);
+    
 });
