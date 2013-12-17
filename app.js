@@ -2,8 +2,8 @@ var MongoClient = require('mongodb').MongoClient;
 var http = require('http');
 var qs = require('querystring');
 var async = require('async');
-var Server = require("./Server.js");
-var configuration = require("./config.js");
+var Server = require("./lib/Server.js");
+var configuration = require("./config/config.js");
 
 MongoClient.connect(configuration.urlMongo, function(err, db) {
     if(err) {console.error(err);}
