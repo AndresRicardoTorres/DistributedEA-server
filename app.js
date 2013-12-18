@@ -8,10 +8,12 @@ var configuration = require("./config/config.js");
 MongoClient.connect(configuration.urlMongo, function(err, db) {
     if(err) {console.error(err);}
     
+    var httpServer;
+    var initialTime = new Date();
     var aServer = Server(db,function(error,isReady){
       if(error) {console.error(error);}
 	var THIS = this;
-	var httpServer = http.createServer(function (request, response) {
+	 httpServer = http.createServer(function (request, response) {
 	  if (request.method == 'POST') {
 	    var requestBody = '';
 	    request.on('data', function(data) {requestBody +=data;});
@@ -31,6 +33,7 @@ MongoClient.connect(configuration.urlMongo, function(err, db) {
 	});
 	
 	httpServer.listen(configuration.httpPort);
+
 	console.log('Server listening on port '+configuration.httpPort);
 	
 	httpServer.on('close',function(){
@@ -44,8 +47,11 @@ MongoClient.connect(configuration.urlMongo, function(err, db) {
       console.log("###BEGIN### "+queueCount);
       task.server.processCommunication(task.data,function(error,answer){
 	task.response.end(answer);
-	if(typeof answer.finalized != 'undefined' && answer.finalized){
-	  httpServer.close();
+	
+	if(answer == JSON.stringify({finalized:true})){
+	  //httpServer.close();
+	  var time = (new Date() - initialTime)/1000;
+	  console.log("Duracion "+time+ "segundos");
 	}
 	callback();
       });

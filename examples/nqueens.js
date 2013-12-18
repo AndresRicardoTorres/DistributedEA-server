@@ -5,7 +5,7 @@ var mongo = require('mongodb');
 var aProject = {
 	  name:'nqueens_project',
 	  populationTotal:100,
-	  generationLimit:100,
+	  generationLimit:10,
 	  mattingPoolPercent:0.60,
 	  mutationPercent:0.11,
 	  creationFunction:mongo.Code(creationFunction),
@@ -54,7 +54,9 @@ function fitnessFunction(aChromosome){
   return queensInAttack;
 }
 
-fitnessFunction([0,1,3,2]);
+console.log(fitnessFunction([0,1,3,2]));
+console.log(fitnessFunction([1,2,3,0]));
+console.log(fitnessFunction([2,0,3,1]));
 
 function mutationFunction(aChromosome){
   var N = aChromosome.length;
