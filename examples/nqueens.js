@@ -1,3 +1,7 @@
+var MongoClient = require('mongodb').MongoClient;
+var configuration = require("../config/config.js");
+var mongo = require('mongodb');
+
 var aProject = {
 	  name:'nqueens_project',
 	  populationTotal:100,
@@ -8,7 +12,7 @@ var aProject = {
 	  fitnessFunction:mongo.Code(fitnessFunction),
 	  mutationFunction:mongo.Code(mutationFunction),
 	  crossoverFunction:mongo.Code(crossoverFunction),
-	  creationOptions:{N:10}
+	  creationOptions:{N:4}
 }
 
 
@@ -22,13 +26,13 @@ function creationFunction(options){
   var chromosome = new Array();
   for(var i=0;i<N;i++){
     var idx=parseInt(Math.random()*N);
-    while(!values[idx]){
+    while(values[idx]){      
       idx=parseInt(Math.random()*N);
     }
     values[idx]=true;
     chromosome[i]=idx;
   }
-  
+  return chromosome;
 }
 
 function fitnessFunction(aChromosome){
@@ -36,14 +40,21 @@ function fitnessFunction(aChromosome){
   var N = aChromosome.length;
   
   //Las horizontales y las verticales están garantizadas por la codificación del cromosoma
-  for (var i=0; i< N-2; i++){
+  for (var i=0; i< N-1; i++){
     for (var j=i+1; j < N; j++){
-      if(aChromosome[i]+i == aChromosome[j]+j){
+//       console.log("i "+i+"j "+j);
+      if(aChromosome[i]+i == aChromosome[j]+j
+	|| aChromosome[i]-i == aChromosome[j]-j){
+// 	console.log(aChromosome[i]+i == aChromosome[j]+j);
+// 	console.log(aChromosome[i]-i == aChromosome[j]-j);
 	queensInAttack+=2;
       }
     }
   }
+  return queensInAttack;
 }
+
+fitnessFunction([0,1,3,2]);
 
 function mutationFunction(aChromosome){
   var N = aChromosome.length;
@@ -58,10 +69,11 @@ function mutationFunction(aChromosome){
 }
 
 function crossoverFunction(aChromosome,otherChromosome){
+  return aChromosome;
   var newChromosome = new Array();
   
   var values = new Array();
-  for(var i=0;i<N;i++){
+  for(var i=0;i<aChromosome.length;i++){
     values[i]=true;
   }
   for(var i=0;i<Math.ceil(aChromosome.length/2);i++){
@@ -79,3 +91,14 @@ function crossoverFunction(aChromosome,otherChromosome){
   
   return newChromosome;
 }
+
+MongoClient.connect(configuration.urlMongo, function(err, database) {
+  var projectsCollection = database.collection("projects");
+  projectsCollection.remove({},function(){
+    projectsCollection.insert(aProject,function(e,d){
+      if(e)console.log(e);
+			      database.close();
+    });  
+  });
+  
+});
