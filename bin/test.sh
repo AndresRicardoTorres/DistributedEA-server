@@ -11,7 +11,7 @@ echo "start clients"
 #waiting for server starts and create initial population
 sleep 4
 node /home/andresrtm/Projects/Reuse/agmp_cliente/app.js > /tmp/client1.log &
-# node /home/andresrtm/Projects/Reuse/agmp_cliente/app.js > /tmp/client2.log &
+node /home/andresrtm/Projects/Reuse/agmp_cliente/app.js > /tmp/client2.log &
 # node /home/andresrtm/Projects/Reuse/agmp_cliente/app.js > /tmp/client3.log &
 echo ":)"
 
