@@ -57,6 +57,8 @@ function fitnessFunction(aChromosome){
 console.log(fitnessFunction([0,1,3,2]));
 console.log(fitnessFunction([1,2,3,0]));
 console.log(fitnessFunction([2,0,3,1]));
+console.log(fitnessFunction([0,1,2,3]));
+console.log(fitnessFunction([3,2,1,0]));
 
 function mutationFunction(aChromosome){
   var N = aChromosome.length;
@@ -78,6 +80,7 @@ function crossoverFunction(aChromosome,otherChromosome){
   for(var i=0;i<aChromosome.length;i++){
     values[i]=true;
   }
+  ///TODO hacer aleatorio el punto de corte
   for(var i=0;i<Math.ceil(aChromosome.length/2);i++){
     newChromosome[i]=aChromosome[i];
     values[ aChromosome[i] ] = false;

@@ -28,7 +28,7 @@ MongoClient.connect(configuration.urlMongo, function(err, db) {
 	      aQueue.push(aTask,function(err){
 		if(err)console.error("ERROR en push "+err);
 		 console.log("###END### "+(queueCount++));
-		//lapTime
+		 console.log("Duracion LAP:"+(new Date()-lapTime)/1000);
 	      });
 	    });
 	  }
@@ -59,6 +59,5 @@ MongoClient.connect(configuration.urlMongo, function(err, db) {
 	}
 	callback();
       });
-    },1);
-    
+    },1);    
 });
