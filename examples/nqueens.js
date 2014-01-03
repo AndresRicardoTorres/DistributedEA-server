@@ -5,14 +5,14 @@ var mongo = require('mongodb');
 var aProject = {
 	  name:'nqueens_project',
 	  populationTotal:1000,
-	  generationLimit:1000,
+	  generationLimit:10,
 	  mattingPoolPercent:0.60,
 	  mutationPercent:0.11,
 	  creationFunction:mongo.Code(creationFunction),
 	  fitnessFunction:mongo.Code(fitnessFunction),
 	  mutationFunction:mongo.Code(mutationFunction),
 	  crossoverFunction:mongo.Code(crossoverFunction),
-	  creationOptions:{N:50}	  
+	  creationOptions:{N:100}	  
 }
 
 
