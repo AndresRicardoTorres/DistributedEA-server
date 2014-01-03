@@ -12,7 +12,7 @@ var aProject = {
 	  fitnessFunction:mongo.Code(fitnessFunction),
 	  mutationFunction:mongo.Code(mutationFunction),
 	  crossoverFunction:mongo.Code(crossoverFunction),
-	  creationOptions:{N:100}	  
+	  creationOptions:{N:1000}	  
 }
 
 
