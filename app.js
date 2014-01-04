@@ -7,12 +7,12 @@ var configuration = require("./config/config.js");
 
 MongoClient.connect(configuration.urlMongo, function(err, db) {
   if(err) {console.error(err);}
-  
+ 
   var httpServer;
   var initialTime = new Date();
   var lapTime;
   var aServer = Server(db,function(error,isReady){
-    if(error) {console.error(error);}		
+    if(error) {console.error("ERROR " +error);}		
     var THIS = this;
     httpServer = http.createServer(function (request, response) {
       if (request.method == 'POST') {
@@ -25,6 +25,7 @@ MongoClient.connect(configuration.urlMongo, function(err, db) {
 	    data:formData,
 	    response:response
 	  }
+  	  THIS.writeInBD();
 	  aQueue.push(aTask,function(err){
 	    if(err)console.error("ERROR en push "+err);
 		      console.log("###END### "+(queueCount++));
