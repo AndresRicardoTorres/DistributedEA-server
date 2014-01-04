@@ -1,19 +1,19 @@
-var MongoClient = require('mongodb').MongoClient;
-var configuration = require("../config/config.js");
-var mongo = require('mongodb');
+// var MongoClient = require('mongodb').MongoClient;
+// var configuration = require("../config/config.js");
+// var mongo = require('mongodb');
 
-var aProject = {
-	  name:'nqueens_project',
-	  populationTotal:100,
-	  generationLimit:100,
-	  mattingPoolPercent:0.60,
-	  mutationPercent:0.11,
-	  creationFunction:mongo.Code(creationFunction),
-	  fitnessFunction:mongo.Code(fitnessFunction),
-	  mutationFunction:mongo.Code(mutationFunction),
-	  crossoverFunction:mongo.Code(crossoverFunction),
-	  creationOptions:{N:100}	  
-}
+// var aProject = {
+// 	  name:'nqueens_project',
+// 	  populationTotal:100,
+// 	  generationLimit:100,
+// 	  mattingPoolPercent:0.60,
+// 	  mutationPercent:0.11,
+// 	  creationFunction:mongo.Code(creationFunction),
+// 	  fitnessFunction:mongo.Code(fitnessFunction),
+// 	  mutationFunction:mongo.Code(mutationFunction),
+// 	  crossoverFunction:mongo.Code(crossoverFunction),
+// 	  creationOptions:{N:100}	  
+// }
 
 
 function creationFunction(options){
@@ -42,23 +42,14 @@ function fitnessFunction(aChromosome){
   //Las horizontales y las verticales están garantizadas por la codificación del cromosoma
   for (var i=0; i< N-1; i++){
     for (var j=i+1; j < N; j++){
-//       console.log("i "+i+"j "+j);
       if(aChromosome[i]+i == aChromosome[j]+j
 	|| aChromosome[i]-i == aChromosome[j]-j){
-// 	console.log(aChromosome[i]+i == aChromosome[j]+j);
-// 	console.log(aChromosome[i]-i == aChromosome[j]-j);
 	queensInAttack+=2;
       }
     }
   }
   return queensInAttack;
 }
-
-console.log(fitnessFunction([0,1,3,2]));
-console.log(fitnessFunction([1,2,3,0]));
-console.log(fitnessFunction([2,0,3,1]));
-console.log(fitnessFunction([0,1,2,3]));
-console.log(fitnessFunction([3,2,1,0]));
 
 function mutationFunction(aChromosome){
   var N = aChromosome.length;
@@ -73,37 +64,52 @@ function mutationFunction(aChromosome){
 }
 
 function crossoverFunction(aChromosome,otherChromosome){
-  return aChromosome;
-  var newChromosome = new Array();
+  //This is a PMX implementation
+  var N = aChromosome.length;
   
-  var values = new Array();
-  for(var i=0;i<aChromosome.length;i++){
-    values[i]=true;
+  //Select the points to cross
+  var startIdx = parseInt(Math.random()*N);
+  var endIdx = parseInt(Math.random()*N);
+  while (startIdx == endIdx){
+    endIdx = parseInt(Math.random()*N);
   }
-  ///TODO hacer aleatorio el punto de corte
-  for(var i=0;i<Math.ceil(aChromosome.length/2);i++){
-    newChromosome[i]=aChromosome[i];
-    values[ aChromosome[i] ] = false;
+  console.log(startIdx,endIdx);
+  if (startIdx > endIdx){
+    var tmp=endIdx;
+    endIdx=startIdx;
+    startIdx=tmp;
   }
   
-  for(var i=0;i<otherChromosome.length;i++)
-  {
-    if(values[ otherChromosome[i] ]){
-      newChromosome.push(otherChromosome[i]);
-      values[ otherChromosome[i] ]=false;
+  //Construct the new chromosome
+  var newChromosome = new Array(startIdx);
+  newChromosome=newChromosome.concat(otherChromosome.slice(startIdx,endIdx));
+  newChromosome=newChromosome.concat(new Array(N-endIdx));
+  
+  for (var i=0; i<N; i++){
+    if(i < startIdx || i >= endIdx){
+      var idx=i;
+      var oldIdx;
+      while (idx != -1){
+	oldIdx=idx;
+	idx=newChromosome.indexOf(aChromosome[oldIdx]);
+      }
+      newChromosome[i] = aChromosome[oldIdx];
     }
   }
   
+  console.log(newChromosome);
   return newChromosome;
 }
 
-MongoClient.connect(configuration.urlMongo, function(err, database) {
-  var projectsCollection = database.collection("projects");
-  projectsCollection.remove({},function(){
-    projectsCollection.insert(aProject,function(e,d){
-      if(e)console.log(e);
-			      database.close();
-    });  
-  });
-  
-});
+crossoverFunction([1,2,3,4,5,6,7,8],[5,6,2,3,4,1,7,8]);
+
+// MongoClient.connect(configuration.urlMongo, function(err, database) {
+//   var projectsCollection = database.collection("projects");
+//   projectsCollection.remove({},function(){
+//     projectsCollection.insert(aProject,function(e,d){
+//       if(e)console.log(e);
+// 			      database.close();
+//     });  
+//   });
+//   
+// });
