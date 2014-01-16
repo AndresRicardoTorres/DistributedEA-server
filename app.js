@@ -25,7 +25,7 @@ MongoClient.connect(configuration.urlMongo, function(err, db) {
 	    data:formData,
 	    response:response
 	  }
-  	  THIS.writeInBD();
+  	  THIS.writeInDB();
 	  aQueue.push(aTask,function(err){
 	    if(err)console.error("ERROR en push "+err);
 		      console.log("###END### "+(queueCount++));
@@ -53,7 +53,7 @@ MongoClient.connect(configuration.urlMongo, function(err, db) {
       task.response.end(answer);
       
       if(answer == JSON.stringify({finalized:true})){
-	//httpServer.close();
+	///Don't stop the server NEVER, other clients can use it
 	var endTime = new Date();
 	var time = (endTime - initialTime)/1000;
 	console.log("End Time : "+ endTime + "Duration "+time+ "segundos");

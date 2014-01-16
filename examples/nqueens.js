@@ -1,19 +1,20 @@
-// var MongoClient = require('mongodb').MongoClient;
-// var configuration = require("../config/config.js");
-// var mongo = require('mongodb');
+var MongoClient = require('mongodb').MongoClient;
+var configuration = require("../config/config.js");
+var mongo = require('mongodb');
 
-// var aProject = {
-// 	  name:'nqueens_project',
-// 	  populationTotal:100,
-// 	  generationLimit:100,
-// 	  mattingPoolPercent:0.60,
-// 	  mutationPercent:0.11,
-// 	  creationFunction:mongo.Code(creationFunction),
-// 	  fitnessFunction:mongo.Code(fitnessFunction),
-// 	  mutationFunction:mongo.Code(mutationFunction),
-// 	  crossoverFunction:mongo.Code(crossoverFunction),
-// 	  creationOptions:{N:100}	  
-// }
+var aProject = {
+	  name:'nqueens_project',
+	  populationTotal:100,
+	  generationLimit:100,
+	  mattingPoolPercent:0.60,
+	  mutationPercent:0.11,
+	  creationFunction:mongo.Code(creationFunction),
+	  fitnessFunction:mongo.Code(fitnessFunction),
+	  mutationFunction:mongo.Code(mutationFunction),
+	  crossoverFunction:mongo.Code(crossoverFunction),
+	  creationOptions:{N:100},
+	  sleepTime : 1 * 60 * 1000
+}
 
 
 function creationFunction(options){
@@ -73,7 +74,7 @@ function crossoverFunction(aChromosome,otherChromosome){
   while (startIdx == endIdx){
     endIdx = parseInt(Math.random()*N);
   }
-  console.log(startIdx,endIdx);
+//   console.log(startIdx,endIdx);
   if (startIdx > endIdx){
     var tmp=endIdx;
     endIdx=startIdx;
@@ -97,19 +98,19 @@ function crossoverFunction(aChromosome,otherChromosome){
     }
   }
   
-  console.log(newChromosome);
+//   console.log(newChromosome);
   return newChromosome;
 }
 
 crossoverFunction([1,2,3,4,5,6,7,8],[5,6,2,3,4,1,7,8]);
 
-// MongoClient.connect(configuration.urlMongo, function(err, database) {
-//   var projectsCollection = database.collection("projects");
-//   projectsCollection.remove({},function(){
-//     projectsCollection.insert(aProject,function(e,d){
-//       if(e)console.log(e);
-// 			      database.close();
-//     });  
-//   });
-//   
-// });
+MongoClient.connect(configuration.urlMongo, function(err, database) {
+  var projectsCollection = database.collection("projects");
+  projectsCollection.remove({},function(){
+    projectsCollection.insert(aProject,function(e,d){
+      if(e)console.log(e);
+			      database.close();
+    });  
+  });
+  
+});
