@@ -4,15 +4,15 @@ var mongo = require('mongodb');
 
 var aProject = {
 	  name:'nqueens_project',
-	  populationTotal:100,
-	  generationLimit:100,
+	  populationTotal:1000,
+	  generationLimit:1000,
 	  mattingPoolPercent:0.60,
 	  mutationPercent:0.11,
 	  creationFunction:mongo.Code(creationFunction),
 	  fitnessFunction:mongo.Code(fitnessFunction),
 	  mutationFunction:mongo.Code(mutationFunction),
 	  crossoverFunction:mongo.Code(crossoverFunction),
-	  creationOptions:{N:100},
+	  creationOptions:{N:50},
 	  sleepTime : 1 * 60 * 1000
 }
 
@@ -49,7 +49,7 @@ function fitnessFunction(aChromosome){
       }
     }
   }
-  return queensInAttack;
+  return queensInAttack * -1;
 }
 
 function mutationFunction(aChromosome){
@@ -106,11 +106,17 @@ crossoverFunction([1,2,3,4,5,6,7,8],[5,6,2,3,4,1,7,8]);
 
 MongoClient.connect(configuration.urlMongo, function(err, database) {
   var projectsCollection = database.collection("projects");
+  var populationCollection = database.collection("population");
+  
   projectsCollection.remove({},function(){
     projectsCollection.insert(aProject,function(e,d){
       if(e)console.log(e);
-			      database.close();
+			      
+	populationCollection.remove({},function(){
+			      database.close(); });
     });  
   });
   
 });
+
+
