@@ -25,7 +25,7 @@ MongoClient.connect(configuration.urlMongo, function(err, db) {
 	    data:formData,
 	    response:response
 	  }
-  	  THIS.writeInBD();
+  	  THIS.writeInDB();
 	  aQueue.push(aTask,function(err){
 	    if(err)console.error("ERROR en push "+err);
 		      console.log("###END### "+(queueCount++));
