@@ -5,7 +5,7 @@ var mongo = require('mongodb');
 var aProject = {
 	  name:'nqueens_project',
 	  populationTotal:1000,
-	  generationLimit:1000,
+	  generationLimit:100,
 	  mattingPoolPercent:0.60,
 	  mutationPercent:0.11,
 	  creationFunction:mongo.Code(creationFunction),
@@ -111,8 +111,7 @@ MongoClient.connect(configuration.urlMongo, function(err, database) {
   projectsCollection.remove({},function(){
     projectsCollection.insert(aProject,function(e,d){
       if(e)console.log(e);
-			      
-	populationCollection.remove({},function(){
+	database.dropCollection("population",function(){
 			      database.close(); });
     });  
   });
