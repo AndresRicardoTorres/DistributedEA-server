@@ -1,6 +1,6 @@
 {
   "name": "AGMP_server",
-  "version": "0.3",
+  "version": "0.3.0",
   "description": "Server to distribute a genetic algorithm and save in a NoSQL database",
   "main": "app.js",
   "dependencies": {    
