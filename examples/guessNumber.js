@@ -15,7 +15,7 @@ function creationFunction() {
 function externalFunction(aChromosome) {
   var parameters = [];
   parameters.push("--secret");
-  parameters.push("23,23");
+  parameters.push("17,13");
 
   var program = aChromosome.join(",");
   parameters.push("--program");
@@ -24,22 +24,30 @@ function externalFunction(aChromosome) {
 }
 
 function mutationFunction(aChromosome) {
-  var a = Math.random();
-  var i = Math.ceil(Math.random() * aChromosome.length);
-  if (i < 0) {
-    i = 0;
+  var random = Math.random();
+  var select = Math.ceil(Math.random() * aChromosome.length);
+  var newVal = 0;
+
+  if (select < 0) {
+    select = 0;
   }
-  if (i > aChromosome.length - 1) {
-    i = aChromosome.length - 1;
-  }
-  if (a < 0.5) {
-    aChromosome[i] = parseInt(aChromosome[i], 10) + 1;
-  } else {
-    aChromosome[i] = parseInt(aChromosome[i], 10) - 1;
+  if (select > aChromosome.length - 1) {
+    select = aChromosome.length - 1;
   }
 
-  var c = Math.random();
-  if (c < 0.5) {
+  if (random < 0.5) {
+    newVal = aChromosome[select] + 1;
+  } else {
+    newVal = aChromosome[select] - 1;
+  }
+
+  if (newVal < 0) {
+    newVal = 0;
+  }
+  aChromosome[select] = newVal;
+
+  random = Math.random();
+  if (random < 0.5) {
     aChromosome.push(Math.ceil(Math.random() * 10));
   } else {
     aChromosome.length = aChromosome.length - 1;
@@ -53,8 +61,7 @@ function crossoverFunction(aChromosome, otherChromosome) {
   var which         = aChromosome.length > otherChromosome.length;
   var maxLength     = which ? aChromosome.length : otherChromosome.length;
   var minLength     = which ? otherChromosome.length : aChromosome.length;
-  var difference    = Math.abs(aChromosome.length - otherChromosome.length);
-  var point         = Math.ceil(Math.random() * difference);
+  var point         = Math.ceil(Math.random() * minLength);
   var i             = 0;
 
   for (i = 0; i < maxLength; i++) {
@@ -65,7 +72,7 @@ function crossoverFunction(aChromosome, otherChromosome) {
     }
   }
 
-  for (i = point; i < point + minLength; i++) {
+  for (i = point; i < minLength; i++) {
     if (which) {
       newChromosome[i] = otherChromosome[i];
     } else {
@@ -80,9 +87,8 @@ var aMinute = 60 * 1000;
 
 var aProject =
   { name               : 'guessNumbersOnePlayer',
-    externalProgram    : './bin/GuessNumbersOnePlayer',
-//    externalProgram    : './bin/test.sh',
-    populationTotal    : 100,
+    externalProgram    : './bin/GuessNumberOnePlayer',
+    populationTotal    : 1000,
     generationLimit    : 500,
     mattingPoolPercent : 0.60,
     mutationPercent    : 0.11,
