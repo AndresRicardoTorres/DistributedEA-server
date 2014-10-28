@@ -24,33 +24,40 @@ function externalFunction(aChromosome) {
 }
 
 function mutationFunction(aChromosome) {
-  var random = Math.random();
-  var select = Math.ceil(Math.random() * aChromosome.length);
-  var newVal = 0;
+  var action = Math.random();
+  
+  if (action < 0.5) {
+    /// Modify a gen plus/minus one
+    var select = Math.ceil(Math.random() * aChromosome.length);
+    var random = Math.random();
+    var newVal = 0;
 
-  if (select < 0) {
-    select = 0;
-  }
-  if (select > aChromosome.length - 1) {
-    select = aChromosome.length - 1;
-  }
+    if (select < 0) {
+      select = 0;
+    }
+    if (select > aChromosome.length - 1) {
+      select = aChromosome.length - 1;
+    }
 
-  if (random < 0.5) {
-    newVal = aChromosome[select] + 1;
+    if (random < 0.5) {
+      newVal = aChromosome[select] + 1;
+    } else {
+      newVal = aChromosome[select] - 1;
+    }
+
+    if (newVal < 0) {
+      newVal = 0;
+    }
+    aChromosome[select] = newVal;
   } else {
-    newVal = aChromosome[select] - 1;
-  }
+    /// Change length chromosome
+    var random = Math.random();
 
-  if (newVal < 0) {
-    newVal = 0;
-  }
-  aChromosome[select] = newVal;
-
-  random = Math.random();
-  if (random < 0.5) {
-    aChromosome.push(Math.ceil(Math.random() * 10));
-  } else {
-    aChromosome.length = aChromosome.length - 1;
+    if (random < 0.5) {
+      aChromosome.push(Math.ceil(Math.random() * 10));
+    } else {
+      aChromosome.length = aChromosome.length - 1;
+    }
   }
 
   return aChromosome;
@@ -90,8 +97,8 @@ var aProject =
     externalProgram    : './bin/GuessNumberOnePlayer',
     populationTotal    : 1000,
     generationLimit    : 500,
-    mattingPoolPercent : 0.60,
-    mutationPercent    : 0.11,
+    mattingPoolPercent : 0.40,
+    mutationPercent    : 0.001,
     sleepTime          : aMinute,
     creationFunction   : mongo.Code(creationFunction),
     externalFunction   : mongo.Code(externalFunction),
