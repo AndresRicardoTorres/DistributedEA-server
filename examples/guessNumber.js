@@ -25,12 +25,13 @@ function externalFunction(aChromosome) {
 
 function mutationFunction(aChromosome) {
   var action = Math.random();
-  
+  var random = 0;
+
   if (action < 0.5) {
     /// Modify a gen plus/minus one
     var select = Math.ceil(Math.random() * aChromosome.length);
-    var random = Math.random();
     var newVal = 0;
+    random     = Math.random();
 
     if (select < 0) {
       select = 0;
@@ -51,7 +52,7 @@ function mutationFunction(aChromosome) {
     aChromosome[select] = newVal;
   } else {
     /// Change length chromosome
-    var random = Math.random();
+    random = Math.random();
 
     if (random < 0.5) {
       aChromosome.push(Math.ceil(Math.random() * 10));
@@ -96,9 +97,9 @@ var aProject =
   { name               : 'guessNumbersOnePlayer',
     externalProgram    : './bin/GuessNumberOnePlayer',
     populationTotal    : 1000,
-    generationLimit    : 500,
-    mattingPoolPercent : 0.40,
-    mutationPercent    : 0.001,
+    generationLimit    : 1000,
+    mattingPoolPercent : 0.8,
+    mutationPercent    : 0.3,
     sleepTime          : aMinute,
     creationFunction   : mongo.Code(creationFunction),
     externalFunction   : mongo.Code(externalFunction),
