@@ -1,13 +1,12 @@
 {
-  "name": "AGMP_server",
-  "version": "0.3.0",
-  "description": "Server to distribute a genetic algorithm and save in a NoSQL database",
+  "name": "DEA_server",
+  "version": "1.0.0",
+  "description": "Server application to distribute a genetic algorithm and save population in a NoSQL database",
   "main": "app.js",
-  "dependencies": {    
-    "mongodb": "~1.3.9",    
+  "dependencies": {
+    "mongodb": "~1.3.9",
     "async": "~0.2.9"
   },
-  "repository": "https://bitbucket.org/andresricardotorres/agmp_servidor",
-  "author": "Ricardo Torres <ricardo.torres@correounivalle.edu.co>",
-  "private": true
+  "repository": "http://github.com/AndresRicardoTorres/DistributedEA-server",
+  "author": "Andrés Ricardo Torres <ricardo.torres@correounivalle.edu.co>"
 }
