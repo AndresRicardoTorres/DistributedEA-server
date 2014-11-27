@@ -1,5 +1,5 @@
 var config1 = {
-  urlMongo : 'mongodb://localhost:27017/nqueens',
+  urlMongo : 'mongodb://localhost:27017/reuse',
   httpPort : 8000
 };
 

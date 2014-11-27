@@ -1,5 +1,4 @@
 var MongoClient = require('mongodb').MongoClient;
-var configuration = require("../config/config.js");
 var mongo = require('mongodb');
 
 var aProject =
@@ -106,7 +105,7 @@ function crossoverFunction(aChromosome, otherChromosome){
 
 crossoverFunction([1,2,3,4,5,6,7,8],[5,6,2,3,4,1,7,8]);
 
-MongoClient.connect(configuration.urlMongo, function(err, database) {
+MongoClient.connect('mongodb://localhost:27017/reuse', function(err, database) {
   var projectsCollection = database.collection("projects");
   var populationCollection = database.collection("population");
 

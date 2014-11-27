@@ -1,9 +1,11 @@
+#!/usr/bin/env node
+
 var async       = require('async');
+var Commander   = require('commander');
 var http        = require('http');
 var MongoClient = require('mongodb').MongoClient;
 var qs          = require('querystring');
 
-var configuration = require("./config/config.js");
 var Server        = require("./lib/Server.js");
 var Timer         = require("./lib/timer.js");
 
@@ -18,6 +20,25 @@ var generalTimer   = new Timer();
 var workTimer      = new Timer();
 var requestTimer   = new Timer();
 var deliverTimer   = new Timer();
+
+var defaultValues = {
+  urlMongo : 'mongodb://localhost:27017/reuse',
+  httpPort : 8000
+};
+
+Commander
+  .version('1.0.1')
+  .option('-p, --port <n>', 'Http port for communication with clients',
+     parseInt)
+  .option('-u, --urlMongo <url>', 'URL for connect with MongoDB')
+  .parse(process.argv);
+
+if (Commander.port) {
+  defaultValues.httpPort = Commander.port;
+}
+if (Commander.urlMongo) {
+  defaultValues.urlMongo = Commander.urlMongo;
+}
 
 function printReport() {
   generalTimer.stop();
@@ -92,23 +113,23 @@ function processHttpRequest(request, response) {
   });
 }
 
-MongoClient.connect(configuration.urlMongo, function (err, db) {
+MongoClient.connect(defaultValues.urlMongo, function (err, db) {
   if (err) {
     console.error(err);
     console.error("Is MongoDB server running ?");
   } else {
     aServer = new Server(db, function (error) {
       if (error) {
-        console.error("ERROR :"  + error);
+        console.error(error);
       } else {
 
         // Start queue for client request
         aQueue = async.queue(processTask, PARALELL_TASKS);
         // Start HTTP server
         httpServer = http.createServer(processHttpRequest);
-        httpServer.listen(configuration.httpPort);
+        httpServer.listen(defaultValues.httpPort);
 
-        console.log('Server listening on port ' + configuration.httpPort);
+        console.log('Server listening on port ' + defaultValues.httpPort);
         console.log('Start time :' + new Date());
       }
     });
