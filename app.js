@@ -3,7 +3,8 @@
 var async       = require('async');
 var Commander   = require('commander');
 var http        = require('http');
-var MongoClient = require('mongodb').MongoClient;
+var Mongo       = require('mongodb');
+var MongoClient = Mongo.MongoClient;
 var qs          = require('querystring');
 
 var Server        = require("./lib/Server.js");
@@ -31,6 +32,7 @@ Commander
   .option('-p, --port <n>', 'Http port for communication with clients',
      parseInt)
   .option('-u, --urlMongo <url>', 'URL for connect with MongoDB')
+  .option('-s, --save <file>', 'JS file with project description')
   .parse(process.argv);
 
 if (Commander.port) {
@@ -44,13 +46,13 @@ function printReport() {
   generalTimer.stop();
 
   console.info("=== REPORT ===");
-  console.info("Initial Time: "  + generalTimer.getInitialDate());
-  console.info("End Time: "      + generalTimer.getEndDate());
-  console.info("Total Duration:" + generalTimer.getTime());
+  console.info("Initial Time   :" + generalTimer.getInitialDate());
+  console.info("End Time       :" + generalTimer.getEndDate());
+  console.info("Total Duration :" + generalTimer.getTime());
   console.info("");
   console.info("Time work in server :" + workTimer.getTime());
-  console.info("Request time :"        + requestTimer.getTime());
-  console.info("Deliver time : "       + deliverTimer.getTime());
+  console.info("Request time        :" + requestTimer.getTime());
+  console.info("Deliver time        :" + deliverTimer.getTime());
   console.info("");
   console.info("Total tasks completed:" + queueCount);
 }
@@ -113,25 +115,61 @@ function processHttpRequest(request, response) {
   });
 }
 
-MongoClient.connect(defaultValues.urlMongo, function (err, db) {
-  if (err) {
-    console.error(err);
+MongoClient.connect(defaultValues.urlMongo, function (error, database) {
+  if (error) {
+    console.error(error);
     console.error("Is MongoDB server running ?");
   } else {
-    aServer = new Server(db, function (error) {
-      if (error) {
-        console.error(error);
-      } else {
 
-        // Start queue for client request
-        aQueue = async.queue(processTask, PARALELL_TASKS);
-        // Start HTTP server
-        httpServer = http.createServer(processHttpRequest);
-        httpServer.listen(defaultValues.httpPort);
+    if (Commander.save) {
+      /// Save a project
+      var projectsCollection = database.collection("projects");
+      var projectFile        = Commander.save;
+      var project            = require("./" + projectFile);
+      var projectName        = project.name;
 
-        console.log('Server listening on port ' + defaultValues.httpPort);
-        console.log('Start time :' + new Date());
-      }
-    });
+
+      projectsCollection.findOne({name: projectName}, function (error, doc) {
+        if (error) {
+          console.error(error);
+        } else {
+          if (doc !== null) {
+            console.error("The project " + project.name + " already exists");
+            database.close();
+          } else {
+            /// Convert JS functions in Mongo Functions
+            var objName = null;
+            for (objName in project) {
+              if (typeof project[objName] === "function") {
+                project[objName] = Mongo.code(project[objName]);
+              }
+            }
+            /// Insert Project and delete population
+            projectsCollection.insert(project, function () {
+              database.dropCollection("pop_" + projectName, function () {
+                database.close();
+              });
+            });
+          }
+        }
+      });
+    } else {
+      /// Start HTTP server
+      aServer = new Server(database, function (error) {
+        if (error) {
+          console.error(error);
+        } else {
+
+          // Start queue for client requests
+          aQueue = async.queue(processTask, PARALELL_TASKS);
+          // Start HTTP server
+          httpServer = http.createServer(processHttpRequest);
+          httpServer.listen(defaultValues.httpPort);
+
+          console.log('Server listening on port ' + defaultValues.httpPort);
+          console.log('Start time :' + new Date());
+        }
+      });
+    }
   }
 });

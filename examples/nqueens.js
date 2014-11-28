@@ -1,122 +1,112 @@
-var MongoClient = require('mongodb').MongoClient;
-var mongo = require('mongodb');
+function creationFunction(options) {
+  var N      = options.N;
+  var chromosome = [];
+  var values = [];
+  var i      = 0;
+  var idx    = 0;
 
-var aProject =
-  { name               : 'nqueens_project'
-  , externalProgram    : ""
-  , populationTotal    : 1000
-  , generationLimit    : 100
-  , mattingPoolPercent : 0.60
-  , mutationPercent    : 0.11
-  , sleepTime          : 1 * 60 * 1000
-  , creationFunction   : mongo.Code(creationFunction)
-  , fitnessFunction    : mongo.Code(fitnessFunction)
-  , mutationFunction   : mongo.Code(mutationFunction)
-  , crossoverFunction  : mongo.Code(crossoverFunction)
-  , externalFunction   : mongo.Code("null")
-  , creationOptions    : {N : 50}
+  for (i = 0; i < N; i++) {
+    values[i] = false;
   }
 
-
-function creationFunction(options){
-  var N = options.N;
-  var values = new Array();
-  for(var i=0;i<N;i++){
-    values[i]=false;
-  }
-
-  var chromosome = new Array();
-  for(var i=0;i<N;i++){
-    var idx=parseInt(Math.random()*N);
-    while(values[idx]){
-      idx=parseInt(Math.random()*N);
+  for (i = 0; i < N; i++) {
+    idx = parseInt(Math.random() * N, 10);
+    while (values[idx]) {
+      idx = parseInt(Math.random() * N, 10);
     }
-    values[idx]=true;
-    chromosome[i]=idx;
+    values[idx]   = true;
+    chromosome[i] = idx;
   }
   return chromosome;
 }
 
-function fitnessFunction(aChromosome){
-  var queensInAttack=0;
-  var N = aChromosome.length;
+function fitnessFunction(aChromosome) {
+  var N              = aChromosome.length;
+  var queensInAttack = 0;
+  var i              = 0;
+  var j              = 0;
 
-  //Las horizontales y las verticales están garantizadas por la codificación del cromosoma
-  for (var i=0; i< N-1; i++){
-    for (var j=i+1; j < N; j++){
-      if(aChromosome[i]+i == aChromosome[j]+j
-	|| aChromosome[i]-i == aChromosome[j]-j){
-	queensInAttack+=2;
+  for (i = 0; i < N - 1; i++) {
+    for (j = i + 1; j < N; j++) {
+      if (aChromosome[i] + i === aChromosome[j] + j
+          || aChromosome[i] - i === aChromosome[j] - j) {
+        queensInAttack += 2;
       }
     }
   }
   return queensInAttack * -1;
 }
 
-function mutationFunction(aChromosome){
-  var N = aChromosome.length;
-  var x=parseInt(Math.random()*N);
-  var y=parseInt(Math.random()*N);
-
-  var tmp=aChromosome[x];
-  aChromosome[x]=aChromosome[y];
-  aChromosome[y]=tmp;
+function mutationFunction(aChromosome) {
+  var N          = aChromosome.length;
+  var X          = parseInt(Math.random() * N, 10);
+  var Y          = parseInt(Math.random() * N, 10);
+  var tmp        = aChromosome[X];
+  aChromosome[X] = aChromosome[Y];
+  aChromosome[Y] = tmp;
 
   return aChromosome;
 }
 
 //This is a PMX implementation
-function crossoverFunction(aChromosome, otherChromosome){
-  var N = aChromosome.length;
-
+function crossoverFunction(aChromosome, otherChromosome) {
+  var N             = aChromosome.length;
+  var newChromosome = [];
   //Select the points to cross
-  var startIdx = parseInt(Math.random()*N);
-  var endIdx = parseInt(Math.random()*N);
-  while (startIdx == endIdx){
-    endIdx = parseInt(Math.random()*N);
+  var startIdx = parseInt(Math.random() * N, 10);
+  var endIdx   = parseInt(Math.random() * N, 10);
+  var tmp      = 0;
+  var i        = 0;
+  var idx      = 0;
+  var oldIdx   = 0;
+
+  while (startIdx === endIdx) {
+    endIdx = parseInt(Math.random() * N, 10);
   }
-//   console.log(startIdx,endIdx);
-  if (startIdx > endIdx){
-    var tmp=endIdx;
-    endIdx=startIdx;
-    startIdx=tmp;
+
+  if (startIdx > endIdx) {
+    tmp      = endIdx;
+    endIdx   = startIdx;
+    startIdx = tmp;
   }
 
   //Construct the new chromosome
-  var newChromosome = new Array(startIdx);
-  newChromosome=newChromosome.concat(otherChromosome.slice(startIdx,endIdx));
-  newChromosome=newChromosome.concat(new Array(N-endIdx));
+  newChromosome = [];
+  newChromosome.length = startIdx;
+  tmp           = otherChromosome.slice(startIdx, endIdx);
+  newChromosome = newChromosome.concat(tmp);
+  tmp           = [];
+  tmp.length    = N - endIdx;
+  newChromosome = newChromosome.concat(tmp);
 
-  for (var i=0; i<N; i++){
-    if(i < startIdx || i >= endIdx){
-      var idx=i;
-      var oldIdx;
-      while (idx != -1){
-	oldIdx=idx;
-	idx=newChromosome.indexOf(aChromosome[oldIdx]);
+  for (i = 0; i < N; i++) {
+    if (i < startIdx || i >= endIdx) {
+      idx = i;
+      while (idx !== -1) {
+        oldIdx = idx;
+        idx    = newChromosome.indexOf(aChromosome[oldIdx]);
       }
       newChromosome[i] = aChromosome[oldIdx];
     }
   }
 
-//   console.log(newChromosome);
   return newChromosome;
 }
 
-crossoverFunction([1,2,3,4,5,6,7,8],[5,6,2,3,4,1,7,8]);
+var aProject =
+  { name               : 'nqueens_project',
+    externalProgram    : null,
+    populationTotal    : 1000,
+    generationLimit    : 100,
+    mattingPoolPercent : 0.60,
+    mutationPercent    : 0.11,
+    sleepTime          : 60 * 1000,
+    creationFunction   : creationFunction,
+    fitnessFunction    : fitnessFunction,
+    mutationFunction   : mutationFunction,
+    crossoverFunction  : crossoverFunction,
+    externalFunction   : null,
+    creationOptions    : {N : 50}
+    };
 
-MongoClient.connect('mongodb://localhost:27017/reuse', function(err, database) {
-  var projectsCollection = database.collection("projects");
-  var populationCollection = database.collection("population");
-
-  projectsCollection.remove({},function(){
-    projectsCollection.insert(aProject,function(e,d){
-      if(e)console.log(e);
-	database.dropCollection("population",function(){
-			      database.close(); });
-    });
-  });
-
-});
-
-
+module.exports = aProject;
