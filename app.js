@@ -1,107 +1,175 @@
-var MongoClient = require('mongodb').MongoClient;
-var http = require('http');
-var qs = require('querystring');
-var async = require('async');
-var Server = require("./lib/Server.js");
-var configuration = require("./config/config.js");
+#!/usr/bin/env node
 
-var httpServer;
-var aServer;
-var aQueue;
-var initialTime=null;
-var lapTime=0;
-var lapTotalTime = 0;
-var timeRequest=0;
-var timeDeliver=0;
-var queueCount = 0;
+var async       = require('async');
+var Commander   = require('commander');
+var http        = require('http');
+var Mongo       = require('mongodb');
+var MongoClient = Mongo.MongoClient;
+var qs          = require('querystring');
+
+var Server        = require("./lib/Server.js");
+var Timer         = require("./lib/timer.js");
+
+var httpServer     = null;
+var aServer        = null;
+var aQueue         = null;
+var initialTime    = null;
+var queueCount     = 0;
 var PARALELL_TASKS = 1;
 
-function printReport(){
-  var endTime = new Date();
-  var time = (endTime - initialTime)/1000;
-  lapTotalTime=lapTotalTime/1000;
-  console.info("===REPORT===");
-  console.info("Initial Time: "+ initialTime);
-  console.info("End Time: "+ endTime);
-  console.info("Total Duration:"+time);
-  console.info("");
-  console.info("Time work in server:"+ lapTotalTime);
-  console.info("Request time: "+aServer.totalTimeRequest/1000);
-  console.info("Request time (round): "+timeRequest/1000);
-  console.info("Deliver time: "+aServer.totalTimeDeliver/1000);
-  console.info("Deliver time (round): "+timeDeliver/1000);
-  console.info("");
-  console.info("Total tasks completed:" +queueCount);
+var generalTimer   = new Timer();
+var workTimer      = new Timer();
+var requestTimer   = new Timer();
+var deliverTimer   = new Timer();
+
+var defaultValues = {
+  urlMongo : 'mongodb://localhost:27017/reuse',
+  httpPort : 8000
+};
+
+Commander
+  .version('1.0.1')
+  .option('-p, --port <n>', 'Http port for communication with clients',
+     parseInt)
+  .option('-u, --urlMongo <url>', 'URL for connect with MongoDB')
+  .option('-s, --save <file>', 'JS file with project description')
+  .parse(process.argv);
+
+if (Commander.port) {
+  defaultValues.httpPort = Commander.port;
+}
+if (Commander.urlMongo) {
+  defaultValues.urlMongo = Commander.urlMongo;
 }
 
-function processQueue(task,callback)
-{  
-  lapTime = new Date();
-  aServer.processCommunication(task.data,function(error,answer){
-    if (answer== JSON.stringify({ok:true})){
-      timeDeliver+=new Date()-lapTime;
+function printReport() {
+  generalTimer.stop();
+
+  console.info("=== REPORT ===");
+  console.info("Initial Time   :" + generalTimer.getInitialDate());
+  console.info("End Time       :" + generalTimer.getEndDate());
+  console.info("Total Duration :" + generalTimer.getTime());
+  console.info("");
+  console.info("Time work in server :" + workTimer.getTime());
+  console.info("Request time        :" + requestTimer.getTime());
+  console.info("Deliver time        :" + deliverTimer.getTime());
+  console.info("");
+  console.info("Total tasks completed:" + queueCount);
+}
+
+function processTask(task, callback) {
+  workTimer.start();
+  requestTimer.start();
+  deliverTimer.start();
+
+  aServer.processCommunication(task.data, function (error, answer) {
+    if (error) {
+      console.error(error);
     }
-    else{
-      timeRequest+=new Date()-lapTime;
+
+    if (answer === JSON.stringify({ok: true})) {
+      deliverTimer.stop();
+    } else {
+      requestTimer.stop();
+
     }
     task.response.end(answer);
-    
-    if(answer == JSON.stringify({finalized:true})){
-        printReport();
+
+    if (answer === JSON.stringify({finalized: true})) {
+      printReport();
     }
     callback();
   });
 }
 
-function finishedTask(err){
-  if(err)
-        console.error("ERROR en push "+err);
-  queueCount++;            
-  lapTotalTime+=(new Date()-lapTime);
+function finishedTask(err) {
+  if (err) {
+    console.error("ERROR en push " + err);
+  }
+  queueCount++;
+  workTimer.stop();
 }
 
-function processHttpRequest(request,response){
-  if(initialTime == null)
-    initialTime = new Date();
+function processHttpRequest(request, response) {
+  if (0 === generalTimer.getInitialDate()) {
+    generalTimer.start();
+  }
 
   var requestBody = '';
-  request.on('data', function(data) {
-    requestBody +=data;
+  request.on('data', function (data) {
+    requestBody += data;
   });
-  request.on('end', function() {
+  request.on('end', function () {
     var formData = qs.parse(requestBody);
 
     ///Write in database parallel to queue process
     aServer.writeInDB();
 
-    var aTask = {      
-      data:formData,
-      response:response
-    }
+    var aTask = {
+      data: formData,
+      response: response
+    };
 
     /// add a task to the queue process
-    aQueue.push(aTask,finishedTask);
-  });  
+    aQueue.push(aTask, finishedTask);
+  });
 }
 
-MongoClient.connect(configuration.urlMongo, function(err, db) {
-  if(err) {
-    console.error("ERROR >> "+err);
-  }
-  
-  Server(db,function(error,isReady){
-    aServer = this;
-    if(error) {
-      console.error("ERROR " +error);
-    }
-    
-    // Start queue for client request
-    aQueue = async.queue(processQueue,PARALELL_TASKS);
-    // Start HTTP server
-    httpServer = http.createServer(processHttpRequest);
-    httpServer.listen(configuration.httpPort);
+MongoClient.connect(defaultValues.urlMongo, function (error, database) {
+  if (error) {
+    console.error(error);
+    console.error("Is MongoDB server running ?");
+  } else {
 
-    console.log('Server listening on port '+configuration.httpPort);
-    console.log('Start time :'+new Date());
-  });
+    if (Commander.save) {
+      /// Save a project
+      var projectsCollection = database.collection("projects");
+      var projectFile        = Commander.save;
+      var project            = require("./" + projectFile);
+      var projectName        = project.name;
+
+
+      projectsCollection.findOne({name: projectName}, function (error, doc) {
+        if (error) {
+          console.error(error);
+        } else {
+          if (doc !== null) {
+            console.error("The project " + project.name + " already exists");
+            database.close();
+          } else {
+            /// Convert JS functions in Mongo Functions
+            var objName = null;
+            for (objName in project) {
+              if (typeof project[objName] === "function") {
+                project[objName] = Mongo.code(project[objName]);
+              }
+            }
+            /// Insert Project and delete population
+            projectsCollection.insert(project, function () {
+              database.dropCollection("pop_" + projectName, function () {
+                database.close();
+              });
+            });
+          }
+        }
+      });
+    } else {
+      /// Start HTTP server
+      aServer = new Server(database, function (error) {
+        if (error) {
+          console.error(error);
+        } else {
+
+          // Start queue for client requests
+          aQueue = async.queue(processTask, PARALELL_TASKS);
+          // Start HTTP server
+          httpServer = http.createServer(processHttpRequest);
+          httpServer.listen(defaultValues.httpPort);
+
+          console.log('Server listening on port ' + defaultValues.httpPort);
+          console.log('Start time :' + new Date());
+        }
+      });
+    }
+  }
 });
