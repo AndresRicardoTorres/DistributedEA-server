@@ -1,8 +1,3 @@
-var mongo          = require('mongodb');
-var MongoClient    = mongo.MongoClient;
-var configuration  = require("../config/config.js");
-
-
 function creationFunction() {
   var aChromosome = [];
   var i           = 0;
@@ -15,7 +10,7 @@ function creationFunction() {
 function externalFunction(aChromosome) {
   var parameters = [];
   parameters.push("--secret");
-  parameters.push("17,13");
+  parameters.push("50,50");
 
   var program = aChromosome.join(",");
   parameters.push("--program");
@@ -91,38 +86,26 @@ function crossoverFunction(aChromosome, otherChromosome) {
   return newChromosome;
 }
 
+function fitnessFunction() {
+  return "This project does not use fitnessFunction because use another " +
+         "program to calculate fitness";
+}
+
 var aMinute = 60 * 1000;
 
 var aProject =
-  { name               : 'guessNumbersOnePlayer',
+  { name               : 'GN_10',
     externalProgram    : './bin/GuessNumberOnePlayer',
     populationTotal    : 1000,
     generationLimit    : 1000,
-    mattingPoolPercent : 0.8,
     mutationPercent    : 0.3,
     sleepTime          : aMinute,
-    creationFunction   : mongo.Code(creationFunction),
-    externalFunction   : mongo.Code(externalFunction),
-    mutationFunction   : mongo.Code(mutationFunction),
-    crossoverFunction  : mongo.Code(crossoverFunction),
-    fitnessFunction    : mongo.Code("null"),
+    creationFunction   : creationFunction,
+    externalFunction   : externalFunction,
+    mutationFunction   : mutationFunction,
+    crossoverFunction  : crossoverFunction,
+    fitnessFunction    : fitnessFunction,
     creationOptions    : {},
     };
 
-MongoClient.connect(configuration.urlMongo, function (err, database) {
-  if (err) {
-    console.log(err);
-  }
-  var projectsCollection   = database.collection("projects");
-
-  projectsCollection.remove({}, function () {
-    projectsCollection.insert(aProject, function (e) {
-      if (e) {
-        console.log(e);
-      }
-      database.dropCollection("population", function () {
-        database.close();
-      });
-    });
-  });
-});
+module.exports = aProject;
