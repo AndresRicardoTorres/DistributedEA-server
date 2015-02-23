@@ -98,12 +98,12 @@ function externalFunction() {
 }
 
 var aProject =
-  { name               : 'n2',
+  { name               : 'q1',
     externalProgram    : "",
     populationTotal    : 1000,
-    generationLimit    : 200,
+    generationLimit    : 1000,
     mutationPercent    : 0.11,
-    sleepTime          : 60 * 1000,
+    sleepTime          : 10 * 1000,
     creationFunction   : creationFunction,
     fitnessFunction    : fitnessFunction,
     mutationFunction   : mutationFunction,
