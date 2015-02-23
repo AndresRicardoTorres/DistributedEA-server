@@ -93,19 +93,22 @@ function crossoverFunction(aChromosome, otherChromosome) {
   return newChromosome;
 }
 
+function externalFunction() {
+  return "This project does not use extenalFunction nor externalProgram";
+}
+
 var aProject =
-  { name               : 'nqueens_project',
-    externalProgram    : null,
+  { name               : 'n2',
+    externalProgram    : "",
     populationTotal    : 1000,
-    generationLimit    : 100,
-    mattingPoolPercent : 0.60,
+    generationLimit    : 200,
     mutationPercent    : 0.11,
     sleepTime          : 60 * 1000,
     creationFunction   : creationFunction,
     fitnessFunction    : fitnessFunction,
     mutationFunction   : mutationFunction,
     crossoverFunction  : crossoverFunction,
-    externalFunction   : null,
+    externalFunction   : externalFunction,
     creationOptions    : {N : 50}
     };
 

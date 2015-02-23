@@ -23,8 +23,9 @@ var requestTimer   = new Timer();
 var deliverTimer   = new Timer();
 
 var defaultValues = {
-  urlMongo : 'mongodb://localhost:27017/reuse',
-  httpPort : 8000
+  urlMongo    : 'mongodb://localhost:27017/reuse',
+  httpPort    : 8000,
+  projectName : null
 };
 
 Commander
@@ -33,6 +34,7 @@ Commander
      parseInt)
   .option('-u, --urlMongo <url>', 'URL for connect with MongoDB')
   .option('-s, --save <file>', 'JS file with project description')
+  .option('-r, --run <projectName>', 'Run a specified project')
   .parse(process.argv);
 
 if (Commander.port) {
@@ -41,20 +43,27 @@ if (Commander.port) {
 if (Commander.urlMongo) {
   defaultValues.urlMongo = Commander.urlMongo;
 }
+if (Commander.run) {
+  defaultValues.projectName = Commander.run;
+} else {
+  if(!Commander.save) {
+    Commander.help();
+  }
+}
 
 function printReport() {
   generalTimer.stop();
 
   console.info("=== REPORT ===");
-  console.info("Initial Time   :" + generalTimer.getInitialDate());
-  console.info("End Time       :" + generalTimer.getEndDate());
-  console.info("Total Duration :" + generalTimer.getTime());
+  console.info("Initial Time   : " + generalTimer.getInitialDate());
+  console.info("End Time       : " + generalTimer.getEndDate());
+  console.info("Total Duration : " + generalTimer.getTime());
   console.info("");
-  console.info("Time work in server :" + workTimer.getTime());
-  console.info("Request time        :" + requestTimer.getTime());
-  console.info("Deliver time        :" + deliverTimer.getTime());
+  console.info("Time work in server : " + workTimer.getTime());
+  console.info("Request time        : " + requestTimer.getTime());
+  console.info("Deliver time        : " + deliverTimer.getTime());
   console.info("");
-  console.info("Total tasks completed:" + queueCount);
+  console.info("Total tasks completed: " + queueCount);
 }
 
 function processTask(task, callback) {
@@ -141,7 +150,7 @@ MongoClient.connect(defaultValues.urlMongo, function (error, database) {
             var objName = null;
             for (objName in project) {
               if (typeof project[objName] === "function") {
-                project[objName] = Mongo.code(project[objName]);
+                project[objName] = Mongo.Code(project[objName]);
               }
             }
             /// Insert Project and delete population
@@ -155,7 +164,8 @@ MongoClient.connect(defaultValues.urlMongo, function (error, database) {
       });
     } else {
       /// Start HTTP server
-      aServer = new Server(database, function (error) {
+      var projectName = defaultValues.projectName;
+      aServer = new Server(database, projectName,function (error) {
         if (error) {
           console.error(error);
         } else {
