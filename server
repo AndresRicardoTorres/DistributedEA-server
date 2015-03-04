@@ -1,0 +1,237 @@
+#!/usr/bin/env coffee
+
+# Server for manage genetic algorithm clients
+
+# Include third libraries
+async      = require 'async'
+bodyParser = require 'body-parser'
+commander  = require 'commander'
+express    = require 'express'
+mongo      = require 'mongodb'
+progress   = require 'progress'
+request    = require 'request'
+
+# Include own libraries
+Server = require './lib/Server'
+Timer  = require './lib/timer'
+
+actualGeneration    = 0
+aQueue              = null
+aServer             = null
+argv                =
+  urlMongo: 'mongodb://localhost:27017/reuse'
+  httpPort: 8000
+  projectName: null
+  urlSync: 'http://localhost:8081'
+  sync: false
+deliverTimer        = new Timer
+generalTimer        = new Timer
+httpServer          = express()
+initialTime         = null
+MongoClient         = mongo.MongoClient
+PARALELL_TASKS      = 1
+progressBar         = null
+requestTimer        = new Timer
+syncAuth            = false
+taskFinishedCounter = 0
+workTimer           = new Timer
+
+# Report will print end of execution
+printReport = ->
+  generalTimer.stop()
+  console.info '=== REPORT ==='
+  console.info 'Initial Time   : ' + generalTimer.getInitialDate()
+  console.info 'End Time       : ' + generalTimer.getEndDate()
+  console.info 'Total Duration : ' + generalTimer.getTime()
+  console.info ''
+  console.info 'Time work in server : ' + workTimer.getTime()
+  console.info 'Request time        : ' + requestTimer.getTime()
+  console.info 'Deliver time        : ' + deliverTimer.getTime()
+  console.info ''
+  console.info 'Total tasks completed: ' + taskFinishedCounter
+  return
+
+sendTakeToSyncServer = (task, callback) ->
+  # Ask sync server for continue or wait
+  requestSyncTakeOptions =
+    url: argv.urlSync
+    form:
+      action    : 'take'
+      generation: aServer.getGeneration()
+      project   : argv.projectName
+
+  request.post requestSyncTakeOptions, (error, response, body) ->
+    console.error error if error
+
+    if body is 'true'
+      syncAuth = true
+      processData task, callback
+    else
+      syncAuth = false
+      task.response.end JSON.stringify sleep: true
+      callback()
+
+sendLeaveToSyncServer = (callback) ->
+  if argv.sync and syncAuth
+    requestSyncLeaveOptions =
+      form:
+        action : 'leave'
+        project: argv.projectName
+      url: argv.urlSync
+
+    request.post requestSyncLeaveOptions, (error, response, body) ->
+      console.error error if error
+
+      if body is 'true'
+        syncAuth = false
+      callback()
+
+processData = (task, callback) ->
+  deliverTimer.start()
+  requestTimer.start()
+  workTimer.start()
+
+  aServer.processCommunication task.request.body, (error, answer) ->
+    console.error error if error
+
+    if answer == JSON.stringify(ok: true)
+      deliverTimer.stop()
+    else
+      requestTimer.stop()
+
+    task.response.end answer
+    if answer is JSON.stringify(finalized: true)
+      printReport()
+
+    if answer is JSON.stringify(ok: true) and syncAuth is true
+      sendLeaveToSyncServer callback
+    else
+      callback()
+
+# Process a task with a HTTP request
+processTask = (task, callback) ->
+  action = task.action
+
+  if aServer.getGeneration() isnt actualGeneration
+    actualGeneration = aServer.getGeneration()
+    if actualGeneration > 0
+      progressBar.tick()
+
+  if argv.sync and not syncAuth and action is 'request'
+    # Ask to sync server to continue
+    sendTakeToSyncServer task, callback
+  else
+    # No Sync server continue normal process
+    processData task, callback
+
+# Read POST content
+httpServer.use bodyParser.json       limit: '500mb'
+httpServer.use bodyParser.urlencoded limit: '500mb', extended: true
+
+# Handle all GET requests
+httpServer.get '/', (request, response) ->
+  response.send('This server only responds POST requests')
+
+# Handle all POST requests
+httpServer.post '/', (request, response) ->
+  # Start general timer
+  if generalTimer.getInitialDate() is 0
+    generalTimer.start()
+
+  # Write in database, parallel to queue process
+  aServer.writeInDB()
+
+  # add a new task to the queue process
+  newTask =
+    request : request
+    response: response
+
+    action : request.body.action
+
+  aQueue.push newTask,
+              # Callback when the task finished
+              () ->
+                taskFinishedCounter++
+                workTimer.stop()
+
+startHTTPServer = (port, projectName, database) ->
+  new Server( database
+            # Callback when the server is ready for accept request
+            , projectName, (error) ->
+              if error
+                console.error error
+              else
+                # Start queue for client requests
+                aQueue = async.queue(processTask, PARALELL_TASKS)
+                # Start HTTP server
+
+                # Initialize progress bar
+                progressBar = new progress "[:bar] :percent , :eta s " +
+                                            ", :current generation of :total",
+                                          total: aServer.getGenerationLimit()
+
+                httpServer.listen port
+                console.log 'Server listening on port ' + port
+                console.log 'Start time :' + new Date
+            )
+
+saveProject = (projectFile, database) ->
+  projectsCollection = database.collection('projects')
+  project = require('./' + projectFile)
+  projectName = project.name
+  projectsCollection.findOne { name: projectName }, (error, doc) ->
+    `var projectName`
+    if error
+      console.error error
+    else
+      if doc != null
+        console.error 'The project ' + project.name + ' already exists'
+        database.close()
+      else
+        #/ Convert JS functions in Mongo Functions
+        objName = null
+        for objName of project
+          `objName = objName`
+          if typeof project[objName] == 'function'
+            project[objName] = mongo.Code(project[objName])
+        #/ Insert Project and delete population
+        projectsCollection.insert project, ->
+          database.dropCollection 'pop_' + projectName, ->
+            console.log "Project saved"
+            database.close()
+
+commander.version('1.0.1')
+.option('-p, --port <n>', 'Http port for communication with clients', parseInt)
+.option('-u, --urlMongo <url>', 'URL for connect with MongoDB')
+.option('-s, --save <file>', 'JS file with project description')
+.option('-r, --run <projectName>', 'Run a specified project')
+.option('-c, --sync <URL>', 'URL coordinator server for MPEA')
+.parse process.argv
+
+if commander.port
+  argv.httpPort = commander.port
+if commander.urlMongo
+  argv.urlMongo = commander.urlMongo
+if commander.sync
+  # argv.urlSync = Commander.urlSync;
+  argv.sync = true
+
+if commander.run
+  argv.projectName = commander.run
+else
+  if !commander.save
+    commander.help()
+
+MongoClient.connect argv.urlMongo, (error, database) ->
+  if error
+    console.error error
+    console.error 'Is MongoDB server running ?'
+  else
+    if commander.save
+      # Save a project
+      saveProject commander.save, database
+    else
+      # Start HTTP server
+      aServer = startHTTPServer argv.httpPort, argv.projectName, database
+
+

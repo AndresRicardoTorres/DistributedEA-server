@@ -94,10 +94,10 @@ function fitnessFunction() {
 var aMinute = 60 * 1000;
 
 var aProject =
-  { name               : 'GN_10',
+  { name               : 'GN_1',
     externalProgram    : './bin/GuessNumberOnePlayer',
-    populationTotal    : 1000,
-    generationLimit    : 1000,
+    populationTotal    : 100,
+    generationLimit    : 100,
     mutationPercent    : 0.3,
     sleepTime          : aMinute,
     creationFunction   : creationFunction,

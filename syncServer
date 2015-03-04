@@ -1,0 +1,84 @@
+#!/usr/bin/env coffee
+
+# Synchronize multiples server for sharing resources
+
+# Include third libraries
+async      = require 'async'
+express    = require 'express'
+bodyParser = require 'body-parser'
+
+# Indicate if any client is processing or not
+actualClient   = false
+# Registered clients, name -> actual generation
+clients        = []
+# Server
+httpServer     = express()
+# Number of request process at same time
+PARALELL_TASKS = 1
+# Default port
+port           = 8081
+# Queue for the requests
+requestQueue   = {}
+
+processRequest = (task, callback) ->
+  action     = task.action
+  answer     = false
+  generation = task.generation
+  project    = task.project
+
+  switch action
+    when 'take'
+      # Update the generation value for the project
+      found = false
+
+      for client in clients
+        if project is client.project
+          client.generation = generation
+          found = true
+
+      # Insert the project is not found
+      if not found
+        clients.push
+          generation: generation
+          project   : project
+
+      # Search next client
+      if not actualClient and clients.length > 1
+        minGeneration = Number.MAX_VALUE
+        nextProject   = null
+        for client in clients
+          if minGeneration > client.generation
+            minGeneration = client.generation
+            nextProject   = client.project
+
+        if nextProject == project
+          actualClient = project
+          answer       = true
+
+    when 'leave'
+      actualClient = false
+      answer       = true
+
+  callback answer
+
+# Read POST content
+httpServer.use bodyParser.urlencoded extended: true
+
+# Handle POST requests
+httpServer.post '/', (request, response) ->
+  newTask =
+    action     : request.body.action
+    generation : (parseInt request.body.generation, 10) or 0
+    project    : request.body.project
+
+  requestQueue.push newTask,
+                    # Callback when the task finished
+                    (answer) ->
+                      response.send JSON.stringify answer
+
+# Start HTTP server in port
+httpServer.listen port
+requestQueue = async.queue processRequest, PARALELL_TASKS
+
+console.log 'Sync Server listening on port ' + port
+console.log 'Start time :' + new Date
