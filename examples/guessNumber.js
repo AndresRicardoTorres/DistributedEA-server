@@ -10,7 +10,7 @@ function creationFunction() {
 function externalFunction(aChromosome) {
   var parameters = [];
   parameters.push("--secret");
-  parameters.push("50,50");
+  parameters.push("10,10");
 
   var program = aChromosome.join(",");
   parameters.push("--program");
@@ -93,19 +93,20 @@ function fitnessFunction() {
 
 var aMinute = 60 * 1000;
 
-var aProject =
-  { name               : 'GN_1',
-    externalProgram    : './bin/GuessNumberOnePlayer',
-    populationTotal    : 100,
-    generationLimit    : 100,
-    mutationPercent    : 0.3,
-    sleepTime          : aMinute,
+var aProject = {
     creationFunction   : creationFunction,
-    externalFunction   : externalFunction,
-    mutationFunction   : mutationFunction,
-    crossoverFunction  : crossoverFunction,
-    fitnessFunction    : fitnessFunction,
     creationOptions    : {},
+    crossoverFunction  : crossoverFunction,
+    externalFunction   : externalFunction,
+    externalProgram    : './bin/GuessNumberOnePlayer',
+    fitnessFunction    : fitnessFunction,
+    generationLimit    : 1000,
+    mutationFunction   : mutationFunction,
+    mutationPercent    : 0.4,
+    name               : 'GN_1',
+    populationTotal    : 400,
+    sharedFunctions    : true,
+    sleepTime          : aMinute
     };
 
 module.exports = aProject;
