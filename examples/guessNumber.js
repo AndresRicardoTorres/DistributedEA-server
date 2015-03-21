@@ -2,7 +2,7 @@ function creationFunction() {
   var aChromosome = [];
   var i           = 0;
   for (i = 0; i < 10; i++) {
-    aChromosome[i] = Math.ceil(Math.random() * 10);
+    aChromosome[i] = Math.ceil(Math.random() * 1000);
   }
   return aChromosome;
 }
@@ -10,7 +10,7 @@ function creationFunction() {
 function externalFunction(aChromosome) {
   var parameters = [];
   parameters.push("--secret");
-  parameters.push("10,10");
+  parameters.push("50,50");
 
   var program = aChromosome.join(",");
   parameters.push("--program");
@@ -91,7 +91,7 @@ function fitnessFunction() {
          "program to calculate fitness";
 }
 
-var aMinute = 60 * 1000;
+var aSecond = 1000;
 
 var aProject = {
     creationFunction   : creationFunction,
@@ -100,13 +100,13 @@ var aProject = {
     externalFunction   : externalFunction,
     externalProgram    : './bin/GuessNumberOnePlayer',
     fitnessFunction    : fitnessFunction,
-    generationLimit    : 1000,
+    generationLimit    : 500,
     mutationFunction   : mutationFunction,
     mutationPercent    : 0.4,
-    name               : 'GN_1',
+    name               : 'guess_50_50',
     populationTotal    : 400,
     sharedFunctions    : true,
-    sleepTime          : aMinute
+    sleepTime          : aSecond
     };
 
 module.exports = aProject;
