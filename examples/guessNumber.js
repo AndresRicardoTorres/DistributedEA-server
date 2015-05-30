@@ -10,7 +10,7 @@ function creationFunction() {
 function externalFunction(aChromosome) {
   var parameters = [];
   parameters.push("--secret");
-  parameters.push("50,50");
+  parameters.push("500,500");
 
   var program = aChromosome.join(",");
   parameters.push("--program");
@@ -100,13 +100,14 @@ var aProject = {
     externalFunction   : externalFunction,
     externalProgram    : './bin/GuessNumberOnePlayer',
     fitnessFunction    : fitnessFunction,
-    generationLimit    : 500,
+    generationLimit    : 3000,
     mutationFunction   : mutationFunction,
-    mutationPercent    : 0.4,
-    name               : 'guess_50_50',
-    populationTotal    : 400,
-    sharedFunctions    : true,
-    sleepTime          : aSecond
+    mutationPercent    : 0.1,
+    name               : 'guess_1',
+    populationTotal    : 500,
+    sharedFunctions    : false,
+    sleepTime          : aSecond,
+    stopFitnessZero    : true
     };
 
 module.exports = aProject;

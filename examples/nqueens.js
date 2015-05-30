@@ -109,7 +109,8 @@ var aProject =
     mutationFunction   : mutationFunction,
     crossoverFunction  : crossoverFunction,
     externalFunction   : externalFunction,
-    creationOptions    : {N : 50}
+    creationOptions    : {N : 50},
+    stopFitnessZero    : true
     };
 
 module.exports = aProject;

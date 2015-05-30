@@ -39,6 +39,7 @@ workTimer           = new Timer
 # Report will print end of execution
 printReport = ->
   generalTimer.stop()
+  console.info ''
   console.info '=== REPORT ==='
   console.info 'Initial Time   : ' + generalTimer.getInitialDate()
   console.info 'End Time       : ' + generalTimer.getEndDate()
@@ -104,11 +105,10 @@ processData = (task, callback) ->
     toEnd = true
     switch answer.action
       when 'deliver'
-        deliverTimer.stop()
-        if argv.sync and syncAuth
-          toEnd = false
-          aServer.mutateSharedFunctions () ->
-            endCommunication task, answer, callback
+        deliverTimer.stop()  
+        toEnd = false
+        aServer.mutateSharedFunctions () ->
+          endCommunication task, answer, callback
       when 'request'
         requestTimer.stop()
 
@@ -145,12 +145,11 @@ httpServer.get '/', (request, response) ->
 # Handle all POST requests
 httpServer.post '/', (request, response) ->
   # Start general timer
-  if generalTimer.getInitialDate() is 0
-    generalTimer.start()
-
+  generalTimer.start() if generalTimer.getInitialDate() is 0
+      
   # Write in database, parallel to queue process
   aServer.writeInDB()
-
+  
   # add a new task to the queue process
   newTask =
     request : request
@@ -176,9 +175,10 @@ startHTTPServer = (port, projectName, database) ->
                 # Start HTTP server
 
                 # Initialize progress bar
-                progressBar = new progress "[:bar] :percent , :eta s " +
+                progressBar = new progress "[:bar] :percent , :eta m " +
                                             ", :current generation of :total",
-                                          total: aServer.getGenerationLimit()
+                                          total: aServer.getGenerationLimit(),
+                                          width: 20
 
                 httpServer.listen port
                 console.log 'Server listening on port ' + port
